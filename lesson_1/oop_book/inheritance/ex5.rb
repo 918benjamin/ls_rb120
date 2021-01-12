@@ -55,7 +55,7 @@ class Vehicle
 
   def spray_paint(color)
     self.color = color
-    puts "Your car is now a shiny shade of #{color}"
+    puts "Your new #{color} paint job looks great!"
   end
 end
 
@@ -78,3 +78,8 @@ end
 
 rav = MyCar.new(2015, "white", "Rav4")
 tundra = MyTruck.new(2019, "Silver", "Tundra")
+
+rav.speed_up(30)
+rav.current_speed
+
+tundra.spray_paint("blue")

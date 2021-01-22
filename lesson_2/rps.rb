@@ -141,7 +141,7 @@ RPSGame.new.play
 
 
 =begin
-RPS Bonus Features
+RPS Bonus Features (Instructions and my thoughts/notes)
 
 - Keeping score
   Right now, the game doesn't have very much dramatic flair. It'll be more
@@ -152,12 +152,40 @@ RPS Bonus Features
 
   Notes:
     - 10 points is a constant vs magic number
+    - Score as class
+      - Needs to be flexible: a state that stores both the human and computer scores
+      - Could I implement every in this one class easier than as states?
+        - comparing scores, determining a grand winner, etc.
+    - Score as state
+      - Easy to imagine a score as a state of a Player object
+      - But then how do we compare the scores to determine a winner?
+        Where does that code live?
+    - Checklist
+      [ ] A structure to store the score of each Player (Human and Computer)
+      [ ] a mechanism for updating the score of the winning Player each round
+      [ ] a mechanism for checking if the grand winning score has been reached
+            by either player (compare player scores to the winning rounds number)
+      [ ] a constant to hold the grand winning score (10)
+      [ ] a mechanism for asking the player if they want to continue to the
+            next round or quit early
+          [ ] display grand score needs to reflect quitting early (ties)
+      [ ] a mechanism for displaying the grand winner
+      [ ] a mechanism for restarting the whole game (adapt existing)
+      [ ] update the intro messaging to say how many rounds constitute a game
+            "first to 10 games wins" for example
+      Bonus:
+        [ ] Let the user choose how many rounds before a grand winner is chosen?
+            (Is the winning rounds still a constant in this scenario?)
+            (Is there such a thing as a user inputted constant?)
+        [ ] ASCII art for the grand winner message?
 
 
 - Add Lizard and Spock
   This is a variation on the normal Rock Paper Scissors game by adding two more
   options - Lizard and Spock. The full explanation and rules are here:
   http://www.samkass.com/theories/RPSSL.html
+
+  - let the user choose rock paper scissors or lizard spock from the starting message?
 
   Notes:
     -

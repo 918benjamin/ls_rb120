@@ -35,10 +35,11 @@ class Move
 end
 
 class Player
-  attr_accessor :move, :name
+  attr_accessor :move, :name, :score
 
   def initialize
     set_name
+    @score = 0
   end
 end
 
@@ -52,6 +53,7 @@ class Human < Player
       puts "Sorry, you must enter a value."
     end
     self.name = n
+    puts ""
   end
 
   def choose
@@ -78,15 +80,25 @@ end
 
 # Game Orchestration Engine
 class RPSGame
-  attr_accessor :human, :computer
+  WINNING_SCORE = 3
+  
+  attr_accessor :human, :computer, :rounds
 
   def initialize
     @human = Human.new
     @computer = Computer.new
+    @rounds = 1
   end
 
+  def clear_screen
+    system "clear"
+    system "cls"
+  end
+  
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors"
+    puts "Welcome to Rock, Paper, Scissors, #{human.name}!"
+    puts "First one to #{WINNING_SCORE} wins is the grand winner!"
+    puts ""
   end
 
   def display_goodbye_message
@@ -97,15 +109,40 @@ class RPSGame
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
   end
+  
+  def display_round_and_scores
+    puts "Round: #{rounds}"
+    puts "----Scores----"
+    puts "#{human.name}: #{human.score}"
+    puts "#{computer.name}: #{computer.score}"
+    puts "--------------"
+    puts ""
+  end
 
-  def display_winner
+  def display_winner # BAD: This method is now doing 3 things (calculating winner, displaying winner, updating score)
     if human.move > computer.move
       puts "#{human.name} won!"
+      human.score += 1
     elsif human.move < computer.move
       puts "#{computer.name} won!"
+      computer.score += 1
     else
       puts "It's a tie!"
     end
+    self.rounds += 1
+    puts ""
+  end
+  
+  def display_grand_winner
+    puts "After #{rounds - 1} rounds:"
+    if human.score > computer.score
+      puts "#{human.name} is the grand winner with #{human.score} wins!"
+    elsif human.move < computer.move
+      puts "#{computer.name} is the grand winner with #{computer.score} wins!"
+    else
+      puts "It's a tie! Bummer."
+    end
+    puts ""
   end
 
   def play_again?
@@ -120,18 +157,45 @@ class RPSGame
 
     answer.downcase == 'y'
   end
+  
+  def stop_early?
+    answer = nil
+
+    loop do
+      puts "Continue to next round? hit Enter to continue, `n` to stop early."
+      answer = gets.chomp
+      break if ['', 'n'].include?(answer.downcase)
+      puts "Sorry, only use Enter or n."
+    end
+
+    answer == 'n'
+  end
+  
+  def reset
+    human.score = 0
+    computer.score = 0
+    self.rounds = 1
+  end
 
   def play
     display_welcome_message
 
-    loop do
-      human.choose
-      computer.choose
-      display_moves
-      display_winner
+    loop do # The game - all the rounds
+      loop do # each round
+        display_round_and_scores
+        human.choose
+        computer.choose
+        display_moves
+        display_winner
+        break if human.score == WINNING_SCORE || computer.score == WINNING_SCORE || stop_early?
+        clear_screen
+      end
+      
+      display_grand_winner
+      reset
       break unless play_again?
+      clear_screen
     end
-
     display_goodbye_message
   end
 end
@@ -161,18 +225,22 @@ RPS Bonus Features (Instructions and my thoughts/notes)
       - But then how do we compare the scores to determine a winner?
         Where does that code live?
     - Checklist
-      [ ] A structure to store the score of each Player (Human and Computer)
-      [ ] a mechanism for updating the score of the winning Player each round
-      [ ] a mechanism for checking if the grand winning score has been reached
+      [x] A structure to store the score of each Player (Human and Computer)
+      [x] a mechanism for updating the score of the winning Player each round
+        (BAD: display_winner method is doing too much)
+      [x] a constant (winning rounds number) to hold the grand winning score (10)
+      [x] a mechanism for checking if the grand winning score has been reached
             by either player (compare player scores to the winning rounds number)
-      [ ] a constant to hold the grand winning score (10)
-      [ ] a mechanism for asking the player if they want to continue to the
+      [x] a mechanism for asking the player if they want to continue to the
             next round or quit early
-          [ ] display grand score needs to reflect quitting early (ties)
-      [ ] a mechanism for displaying the grand winner
-      [ ] a mechanism for restarting the whole game (adapt existing)
-      [ ] update the intro messaging to say how many rounds constitute a game
+      [x] a mechanism for displaying the grand winner
+        [x] display grand winner needs to reflect quitting early (ties)
+      [x] a mechanism for restarting the whole game (adapt existing)
+      [x] update the intro messaging to say how many rounds constitute a game
             "first to 10 games wins" for example
+      [x] a mechanism to display the score and round number
+          [x] keep track of total rounds (RPSengine instance variable?)
+              (Related to future "history of rounds" bonus feature)
       Bonus:
         [ ] Let the user choose how many rounds before a grand winner is chosen?
             (Is the winning rounds still a constant in this scenario?)
@@ -221,7 +289,7 @@ RPS Bonus Features (Instructions and my thoughts/notes)
     - 
 
 - Notes from TA feedback on other code reviews:
-  - 
+  -  
 
 
 =end

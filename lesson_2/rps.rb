@@ -1,5 +1,10 @@
+def clear_screen
+  system "clear"
+  system "cls"
+end
+
 class Move
-  VALUES = ['rock', 'paper', 'scissors']
+  VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
   def initialize(value)
     @value = value
@@ -17,15 +22,37 @@ class Move
     @value == 'paper'
   end
 
+  def lizard?
+    @value == 'lizard'
+  end
+
+  def spock?
+    @value == 'spock'
+  end
+
   def >(other_move)
-    (rock? && other_move.scissors?) ||
+    (scissors? && other_move.paper?) ||
       (paper? && other_move.rock?) ||
-      (scissors? && other_move.paper?)
+      (rock? && other_move.lizard?) ||
+      (lizard? && other_move.spock?) ||
+      (spock? && other_move.scissors?) ||
+      (scissors? && other_move.lizard?) ||
+      (lizard? && other_move.paper?) ||
+      (paper? && other_move.spock?) ||
+      (spock? && other_move.rock?) ||
+      (rock? && other_move.scissors?)
   end
 
   def <(other_move)
-    (rock? && other_move.paper?) ||
-      (paper? && other_move.scissors?) ||
+    (paper? && other_move.scissors?) ||
+      (rock? && other_move.paper?) ||
+      (lizard? && other_move.rock?) ||
+      (spock? && other_move.lizard?) ||
+      (scissors? && other_move.spock?) ||
+      (lizard? && other_move.scissors?) ||
+      (paper? && other_move.lizard?) ||
+      (spock? && other_move.paper?) ||
+      (rock? && other_move.spock?) ||
       (scissors? && other_move.rock?)
   end
 
@@ -54,12 +81,13 @@ class Human < Player
     end
     self.name = n
     puts ""
+    clear_screen
   end
 
   def choose
     choice = nil
     loop do
-      puts "Please choose rock, paper, or scissors:"
+      puts "Please choose #{Move::VALUES.join(', ')}"
       choice = gets.chomp
       break if Move::VALUES.include?(choice)
       puts "Sorry, invalid choice."
@@ -90,19 +118,15 @@ class RPSGame
     @rounds = 1
   end
 
-  def clear_screen
-    system "clear"
-    system "cls"
-  end
-  
   def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors, #{human.name}!"
+    puts "Welcome to #{Move::VALUES.join(', ')} #{human.name}!"
     puts "First one to #{WINNING_SCORE} wins is the grand winner!"
     puts ""
   end
 
   def display_goodbye_message
-    puts "Thank you for playing Rock, Paper, Scissors. Goodbye!"
+    clear_screen
+    puts "Thank you for playing. Goodbye!"
   end
 
   def display_moves
@@ -152,6 +176,7 @@ class RPSGame
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp
       break if ['y', 'n'].include?(answer.downcase)
+      clear_screen
       puts "Sorry, must be y or n."
     end
 
@@ -166,22 +191,24 @@ class RPSGame
       answer = gets.chomp
       break if ['', 'n'].include?(answer.downcase)
       puts "Sorry, only use Enter or n."
+      clear_screen
     end
 
     answer == 'n'
   end
   
-  def reset
+  def reset_rounds_and_scores
     human.score = 0
     computer.score = 0
     self.rounds = 1
+    clear_screen
   end
 
   def play
     display_welcome_message
 
-    loop do # The game - all the rounds
-      loop do # each round
+    loop do
+      loop do
         display_round_and_scores
         human.choose
         computer.choose
@@ -192,9 +219,8 @@ class RPSGame
       end
       
       display_grand_winner
-      reset
       break unless play_again?
-      clear_screen
+      reset_rounds_and_scores
     end
     display_goodbye_message
   end
@@ -241,7 +267,7 @@ RPS Bonus Features (Instructions and my thoughts/notes)
       [x] a mechanism to display the score and round number
           [x] keep track of total rounds (RPSengine instance variable?)
               (Related to future "history of rounds" bonus feature)
-      Bonus:
+      Extra Bonus(my own ideas):
         [ ] Let the user choose how many rounds before a grand winner is chosen?
             (Is the winning rounds still a constant in this scenario?)
             (Is there such a thing as a user inputted constant?)
@@ -253,10 +279,8 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   options - Lizard and Spock. The full explanation and rules are here:
   http://www.samkass.com/theories/RPSSL.html
 
-  - let the user choose rock paper scissors or lizard spock from the starting message?
-
-  Notes:
-    -
+  Extra bonus(my own ideas)
+  [ ] let the user choose rock paper scissors version or lizard spock version from the start
 
 - Add a class for each move
   What would happen if we went even further and introduced 5 more classes, one
@@ -287,6 +311,12 @@ RPS Bonus Features (Instructions and my thoughts/notes)
 
   Notes:
     - 
+
+
+Other ideas (my own bonus features):
+  - Accept single letter user inputs (just like old RPS game)
+  - "Rock paper scissors lizard, or spock" - add an 'and/or' method
+
 
 - Notes from TA feedback on other code reviews:
   -  

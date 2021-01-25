@@ -75,7 +75,7 @@ class Player
   end
 
   def new_move(choice)
-    case choice.downcase
+    case choice
     when 'rock' then Rock.new(choice)
     when 'paper' then Paper.new(choice)
     when 'scissors' then Scissors.new(choice)

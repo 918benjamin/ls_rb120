@@ -105,7 +105,6 @@ class Human < Player
       puts "Please choose #{Move::VALUES.join(', ')}"
       choice = gets.chomp.downcase
       break if Move::VALUES.include?(choice)
-      # clear_screen
       puts "Sorry, invalid choice."
     end
 

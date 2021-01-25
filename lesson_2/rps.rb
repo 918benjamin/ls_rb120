@@ -88,17 +88,15 @@ end
 class Human < Player
   def set_name
     n = ''
+    clear_screen
     loop do
-      clear_screen
       puts "What's your name?"
       n = gets.chomp
       break unless n.empty?
-      puts ""
+      clear_screen
       puts "Sorry, you must enter a value."
     end
     self.name = n
-    puts ""
-    clear_screen
   end
 
   def choose
@@ -107,10 +105,10 @@ class Human < Player
       puts "Please choose #{Move::VALUES.join(', ')}"
       choice = gets.chomp.downcase
       break if Move::VALUES.include?(choice)
-      clear_screen
+      # clear_screen
       puts "Sorry, invalid choice."
     end
-    puts ""
+
     self.move = new_move(choice)
     move_log << move
   end
@@ -130,18 +128,12 @@ class Computer < Player
 
   def generate_personality
     case name
-    when 'R2D2'
-      ['rock']
-    when 'Hal'
-      %w(scissors scissors scissors scissors rock lizard lizard spock spock)
-    when 'Chappie'
-      %w(spock spock spock lizard lizard lizard rock paper scissors)
-    when 'Sonny'
-      %w(rock rock paper paper scissors scissors lizard lizard spock)
-    when 'Number 5'
-      %w(lizard spock)
-    else
-      %w(rock paper scissors lizard spock)
+    when 'R2D2' then ['rock']
+    when 'Hal' then %w(scissors scissors scissors rock lizard lizard spock)
+    when 'Chappie' then %w(spock spock lizard lizard lizard rock paper scissors)
+    when 'Sonny' then %w(rock rock paper paper scissors scissors lizard lizard)
+    when 'Number 5' then %w(lizard spock)
+    else %w(rock paper scissors lizard spock)
     end
   end
 
@@ -155,7 +147,8 @@ end
 class RPSGame
   WINNING_SCORE = 3
   WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
-                 'destroyed', 'defeated', 'conquered', 'vanquished', 'quashed']
+                   'destroyed', 'defeated', 'conquered', 'vanquished',
+                   'quashed']
 
   attr_accessor :human, :computer, :rounds, :winner_log
 
@@ -167,6 +160,7 @@ class RPSGame
   end
 
   def display_welcome_message
+    clear_screen
     puts "Welcome to #{Move::VALUES.join(', ')} #{human.name}!"
     puts "First one to win #{WINNING_SCORE} rounds is the grand winner!"
     puts ""
@@ -178,6 +172,7 @@ class RPSGame
   end
 
   def display_moves
+    puts ""
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
   end
@@ -225,25 +220,24 @@ class RPSGame
     human.score == WINNING_SCORE || computer.score == WINNING_SCORE
   end
 
-  def determine_grand_winner # TODO: integrate this in and adjust display_grand_winner to match
+  def determine_grand_winner
+    clear_screen
+    puts "Calculating final score..."
+    sleep(2)
+    puts ""
+
     if human.score > computer.score
       human
     elsif human.score < computer.score
       computer
-    else
-      "tie"
     end
   end
 
   def display_grand_winner
-    puts "Calculating final score..."
-    sleep(2)
-    clear_screen
+    winner = determine_grand_winner
     puts "After #{rounds - 1} rounds:"
-    if human.score > computer.score
-      puts "#{human.name} is the grand winner with #{human.score} wins!"
-    elsif human.move < computer.move
-      puts "#{computer.name} is the grand winner with #{computer.score} wins!"
+    if winner
+      puts "#{winner.name} is the grand winner with #{winner.score} wins!"
     else
       puts "It's a tie! Bummer."
     end
@@ -274,7 +268,7 @@ class RPSGame
       clear_screen
       puts "Sorry, only use Enter or n."
     end
-
+    clear_screen
     answer == 'n'
   end
 
@@ -288,7 +282,7 @@ class RPSGame
     clear_screen
   end
 
-  def view_move_log? # TODO Refactor the three related methods into one with arguments
+  def view_move_log?
     answer = nil
 
     loop do
@@ -298,23 +292,29 @@ class RPSGame
       clear_screen
       puts "Sorry, must be y or n."
     end
+    puts ""
 
     answer == 'y'
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def display_move_history
     puts ""
     puts "*****Round History*****"
     winner_log.each_with_index do |winner, index|
+      round = index + 1
       if winner
         loser = (winner == human ? computer : human)
-        puts "Round #{index + 1}: #{winner.name}'s #{winner.move_log[index]} #{WINNING_VERBS.sample} #{loser.name}'s #{loser.move_log[index]}"
+        puts "Round #{round}: #{winner.name}'s #{winner.move_log[index]}"\
+        " #{WINNING_VERBS.sample} #{loser.name}'s #{loser.move_log[index]}"
       else
-        puts "Round #{index + 1}: You tied this round with #{human.move_log[index]}."
+        puts "Round #{round}: You tied this round with "\
+        "#{human.move_log[index]}."
       end
     end
     puts ""
   end
+  # rubocop:enable Metrics/AbcSize
 
   def play
     display_welcome_message
@@ -322,7 +322,6 @@ class RPSGame
       loop do
         play_round
         break if grand_winner? || stop_early?
-        clear_screen
       end
       display_grand_winner
       display_move_history if view_move_log?
@@ -331,6 +330,7 @@ class RPSGame
     end
     display_goodbye_message
   end
+  # rubocop:enable Metrics/MethodLength
 end
 
 # Instantiate RPS object and invoke the #play method to begin the game
@@ -447,7 +447,10 @@ RPS Bonus Features (Instructions and my thoughts/notes)
 Other ideas (my own bonus features):
   - Accept single letter user inputs (just like old RPS game)
   - add an 'and/or' method - "Rock paper scissors lizard, or spock"
-  -
+  - Could refactor the three related methods into one with arguments
+    - play_again? #stop_early? #view_move_log?
+    - but this would require quite a bit of customization.
+      Might be better to leave them as is for now
 
 - Notes from TA feedback on other code reviews:
   -

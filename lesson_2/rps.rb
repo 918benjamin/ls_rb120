@@ -11,7 +11,7 @@ class Move
   end
 
   def scissors?
-    @value == "scissors"
+    @value == 'scissors'
   end
 
   def rock?
@@ -109,7 +109,7 @@ end
 # Game Orchestration Engine
 class RPSGame
   WINNING_SCORE = 3
-  
+
   attr_accessor :human, :computer, :rounds
 
   def initialize
@@ -133,7 +133,7 @@ class RPSGame
     puts "#{human.name} chose #{human.move}."
     puts "#{computer.name} chose #{computer.move}."
   end
-  
+
   def display_round_and_scores
     puts "Round: #{rounds}"
     puts "----Scores----"
@@ -141,6 +141,17 @@ class RPSGame
     puts "#{computer.name}: #{computer.score}"
     puts "--------------"
     puts ""
+  end
+
+  def play_round
+    display_round_and_scores
+    human.choose
+    computer.choose
+    display_moves
+    display_winner
+  end
+
+  def determine_winner #TODO
   end
 
   def display_winner # BAD: This method is now doing 3 things (calculating winner, displaying winner, updating score)
@@ -156,7 +167,14 @@ class RPSGame
     self.rounds += 1
     puts ""
   end
-  
+
+  def grand_winner?
+    human.score == WINNING_SCORE || computer.score == WINNING_SCORE
+  end
+
+  def determine_grand_winner #TODO
+  end
+
   def display_grand_winner
     puts "After #{rounds - 1} rounds:"
     if human.score > computer.score
@@ -182,7 +200,7 @@ class RPSGame
 
     answer.downcase == 'y'
   end
-  
+
   def stop_early?
     answer = nil
 
@@ -196,7 +214,7 @@ class RPSGame
 
     answer == 'n'
   end
-  
+
   def reset_rounds_and_scores
     human.score = 0
     computer.score = 0
@@ -206,18 +224,12 @@ class RPSGame
 
   def play
     display_welcome_message
-
     loop do
       loop do
-        display_round_and_scores
-        human.choose
-        computer.choose
-        display_moves
-        display_winner
-        break if human.score == WINNING_SCORE || computer.score == WINNING_SCORE || stop_early?
+        play_round
+        break if grand_winner? || stop_early?
         clear_screen
       end
-      
       display_grand_winner
       break unless play_again?
       reset_rounds_and_scores
@@ -229,7 +241,7 @@ end
 # Instantiate RPS object and invoke the #play method to begin the game
 RPSGame.new.play
 
-
+# rubocop:disable Layout/LineLength
 =begin
 RPS Bonus Features (Instructions and my thoughts/notes)
 
@@ -273,7 +285,6 @@ RPS Bonus Features (Instructions and my thoughts/notes)
             (Is there such a thing as a user inputted constant?)
         [ ] ASCII art for the grand winner message?
 
-
 - Add Lizard and Spock
   This is a variation on the normal Rock Paper Scissors game by adding two more
   options - Lizard and Spock. The full explanation and rules are here:
@@ -291,7 +302,6 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   Notes:
     -
 
-
 - Keep track of a history of moves
   As long as the user doesn't quit, keep track of a history of moves by both the
   human and computer. What data structure will you reach for? Will you use a new
@@ -299,7 +309,6 @@ RPS Bonus Features (Instructions and my thoughts/notes)
 
   Notes:
     -
-
 
 - Computer personalities
   We have a list of robot names for our Computer class, but other than the name,
@@ -310,16 +319,14 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   rules or personalities for each robot. How would you approach a feature like this?
 
   Notes:
-    - 
-
+    -
 
 Other ideas (my own bonus features):
   - Accept single letter user inputs (just like old RPS game)
   - "Rock paper scissors lizard, or spock" - add an 'and/or' method
 
-
 - Notes from TA feedback on other code reviews:
-  -  
-
+  -
 
 =end
+# rubocop:enable Layout/LineLength

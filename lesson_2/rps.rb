@@ -10,52 +10,6 @@ class Move
     @value = value
   end
 
-  # def scissors?
-  #   @value == 'scissors'
-  # end
-
-  # def rock?
-  #   @value == 'rock'
-  # end
-
-  # def paper?
-  #   @value == 'paper'
-  # end
-
-  # def lizard?
-  #   @value == 'lizard'
-  # end
-
-  # def spock?
-  #   @value == 'spock'
-  # end
-
-  # def >(other_move)
-  #   (scissors? && other_move.paper?) ||
-  #     (paper? && other_move.rock?) ||
-  #     (rock? && other_move.lizard?) ||
-  #     (lizard? && other_move.spock?) ||
-  #     (spock? && other_move.scissors?) ||
-  #     (scissors? && other_move.lizard?) ||
-  #     (lizard? && other_move.paper?) ||
-  #     (paper? && other_move.spock?) ||
-  #     (spock? && other_move.rock?) ||
-  #     (rock? && other_move.scissors?)
-  # end
-
-  # def <(other_move)
-  #   (paper? && other_move.scissors?) ||
-  #     (rock? && other_move.paper?) ||
-  #     (lizard? && other_move.rock?) ||
-  #     (spock? && other_move.lizard?) ||
-  #     (scissors? && other_move.spock?) ||
-  #     (lizard? && other_move.scissors?) ||
-  #     (paper? && other_move.lizard?) ||
-  #     (spock? && other_move.paper?) ||
-  #     (rock? && other_move.spock?) ||
-  #     (scissors? && other_move.rock?)
-  # end
-
   def to_s
     @value
   end
@@ -112,11 +66,12 @@ class Spock < Move
 end
 
 class Player
-  attr_accessor :move, :name, :score
+  attr_accessor :move, :name, :score, :move_log
 
   def initialize
     set_name
     @score = 0
+    @move_log = []
   end
 
   def new_move(choice)
@@ -134,10 +89,11 @@ class Human < Player
   def set_name
     n = ''
     loop do
+      clear_screen
       puts "What's your name?"
       n = gets.chomp
       break unless n.empty?
-      clear_screen
+      puts ""
       puts "Sorry, you must enter a value."
     end
     self.name = n
@@ -151,9 +107,12 @@ class Human < Player
       puts "Please choose #{Move::VALUES.join(', ')}"
       choice = gets.chomp.downcase
       break if Move::VALUES.include?(choice)
+      clear_screen
       puts "Sorry, invalid choice."
     end
+    puts ""
     self.move = new_move(choice)
+    move_log << move
   end
 end
 
@@ -164,24 +123,28 @@ class Computer < Player
 
   def choose
     self.move = new_move(Move::VALUES.sample)
+    move_log << move
   end
 end
 
 # Game Orchestration Engine
 class RPSGame
   WINNING_SCORE = 3
+  WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
+                 'destroyed', 'defeated', 'conquered', 'vanquished', 'quashed']
 
-  attr_accessor :human, :computer, :rounds
+  attr_accessor :human, :computer, :rounds, :winner_log
 
   def initialize
     @human = Human.new
     @computer = Computer.new
     @rounds = 1
+    @winner_log = []
   end
 
   def display_welcome_message
     puts "Welcome to #{Move::VALUES.join(', ')} #{human.name}!"
-    puts "First one to #{WINNING_SCORE} wins is the grand winner!"
+    puts "First one to win #{WINNING_SCORE} rounds is the grand winner!"
     puts ""
   end
 
@@ -209,23 +172,28 @@ class RPSGame
     human.choose
     computer.choose
     display_moves
+    determine_winner
     display_winner
   end
 
-  def determine_winner #TODO
+  def determine_winner
+    winner = nil
+    if human.move > computer.move
+      winner = human
+    elsif human.move < computer.move
+      winner = computer
+    end
+    winner_log << winner
+    winner.score += 1 if winner
+    self.rounds += 1
   end
 
-  def display_winner # BAD: This method is now doing 3 things (calculating winner, displaying winner, updating score)
-    if human.move > computer.move
-      puts "#{human.name} won!"
-      human.score += 1
-    elsif human.move < computer.move
-      puts "#{computer.name} won!"
-      computer.score += 1
+  def display_winner
+    if winner_log[-1]
+      puts "#{winner_log[-1].name} won!"
     else
       puts "It's a tie!"
     end
-    self.rounds += 1
     puts ""
   end
 
@@ -233,7 +201,14 @@ class RPSGame
     human.score == WINNING_SCORE || computer.score == WINNING_SCORE
   end
 
-  def determine_grand_winner #TODO
+  def determine_grand_winner # TODO: integrate this in and adjust display_grand_winner to match
+    if human.score > computer.score
+      human
+    elsif human.score < computer.score
+      computer
+    else
+      "tie"
+    end
   end
 
   def display_grand_winner
@@ -256,13 +231,13 @@ class RPSGame
 
     loop do
       puts "Would you like to play again? (y/n)"
-      answer = gets.chomp
-      break if ['y', 'n'].include?(answer.downcase)
+      answer = gets.chomp.downcase
+      break if ['y', 'n'].include?(answer)
       clear_screen
       puts "Sorry, must be y or n."
     end
 
-    answer.downcase == 'y'
+    answer == 'y'
   end
 
   def stop_early?
@@ -270,10 +245,10 @@ class RPSGame
 
     loop do
       puts "Continue to next round? hit Enter to continue, `n` to stop early."
-      answer = gets.chomp
-      break if ['', 'n'].include?(answer.downcase)
-      puts "Sorry, only use Enter or n."
+      answer = gets.chomp.downcase
+      break if ['', 'n'].include?(answer)
       clear_screen
+      puts "Sorry, only use Enter or n."
     end
 
     answer == 'n'
@@ -281,9 +256,40 @@ class RPSGame
 
   def reset_rounds_and_scores
     human.score = 0
+    human.move_log = []
     computer.score = 0
+    computer.move_log = []
     self.rounds = 1
+    self.winner_log = []
     clear_screen
+  end
+
+  def view_move_log? # TODO Refactor the three related methods into one with arguments
+    answer = nil
+
+    loop do
+      puts "Would you like to view the round history? (y/n)"
+      answer = gets.chomp.downcase
+      break if ['y', 'n'].include?(answer)
+      clear_screen
+      puts "Sorry, must be y or n."
+    end
+
+    answer == 'y'
+  end
+
+  def display_move_history
+    puts ""
+    puts "*****Round History*****"
+    winner_log.each_with_index do |winner, index|
+      if winner
+        loser = (winner == human ? computer : human)
+        puts "Round #{index + 1}: #{winner.name}'s #{winner.move_log[index]} #{WINNING_VERBS.sample} #{loser.name}'s #{loser.move_log[index]}"
+      else
+        puts "Round #{index + 1}: You tied this round with #{human.move_log[index]}."
+      end
+    end
+    puts ""
   end
 
   def play
@@ -295,6 +301,7 @@ class RPSGame
         clear_screen
       end
       display_grand_winner
+      display_move_history if view_move_log?
       break unless play_again?
       reset_rounds_and_scores
     end
@@ -377,7 +384,26 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   class, or an existing class? What will the display output look like?
 
   Notes:
-    -
+    - Each round I need to keep track of the
+      - round number (before it increments)
+      - human object coupled with their move
+      - computer object coupled with their move
+    - Could use nested arrays with a pattern - [[round #, human move, computer move]]
+    - Could use one instance variable of the RPS engine to store with no new classes
+    - Could create instance variable within the player class to store their own move
+      - Then access it from within the RPS engine class
+    - Display:
+      Round 1: Player's Scissors beat Computer's Paper
+      Round 2: ...
+
+  Checklist:
+    [x] Create move_log instance variable and attr_accessor in Player class
+    [x] Initialize empty history: empty array
+    [x] Method for outputting the move history if the user would like
+      [x] Ask the user if they want to see history (before asking to play again)
+      [x] Output the history. Format: Round 1: Player's Scissors beat Computer's Paper
+    [x] Store each move to the history of that player (nested array)
+    [x] Reset history if they play again
 
 - Computer personalities
   We have a list of robot names for our Computer class, but other than the name,

@@ -10,54 +10,104 @@ class Move
     @value = value
   end
 
-  def scissors?
-    @value == 'scissors'
-  end
+  # def scissors?
+  #   @value == 'scissors'
+  # end
 
-  def rock?
-    @value == 'rock'
-  end
+  # def rock?
+  #   @value == 'rock'
+  # end
 
-  def paper?
-    @value == 'paper'
-  end
+  # def paper?
+  #   @value == 'paper'
+  # end
 
-  def lizard?
-    @value == 'lizard'
-  end
+  # def lizard?
+  #   @value == 'lizard'
+  # end
 
-  def spock?
-    @value == 'spock'
-  end
+  # def spock?
+  #   @value == 'spock'
+  # end
 
-  def >(other_move)
-    (scissors? && other_move.paper?) ||
-      (paper? && other_move.rock?) ||
-      (rock? && other_move.lizard?) ||
-      (lizard? && other_move.spock?) ||
-      (spock? && other_move.scissors?) ||
-      (scissors? && other_move.lizard?) ||
-      (lizard? && other_move.paper?) ||
-      (paper? && other_move.spock?) ||
-      (spock? && other_move.rock?) ||
-      (rock? && other_move.scissors?)
-  end
+  # def >(other_move)
+  #   (scissors? && other_move.paper?) ||
+  #     (paper? && other_move.rock?) ||
+  #     (rock? && other_move.lizard?) ||
+  #     (lizard? && other_move.spock?) ||
+  #     (spock? && other_move.scissors?) ||
+  #     (scissors? && other_move.lizard?) ||
+  #     (lizard? && other_move.paper?) ||
+  #     (paper? && other_move.spock?) ||
+  #     (spock? && other_move.rock?) ||
+  #     (rock? && other_move.scissors?)
+  # end
 
-  def <(other_move)
-    (paper? && other_move.scissors?) ||
-      (rock? && other_move.paper?) ||
-      (lizard? && other_move.rock?) ||
-      (spock? && other_move.lizard?) ||
-      (scissors? && other_move.spock?) ||
-      (lizard? && other_move.scissors?) ||
-      (paper? && other_move.lizard?) ||
-      (spock? && other_move.paper?) ||
-      (rock? && other_move.spock?) ||
-      (scissors? && other_move.rock?)
-  end
+  # def <(other_move)
+  #   (paper? && other_move.scissors?) ||
+  #     (rock? && other_move.paper?) ||
+  #     (lizard? && other_move.rock?) ||
+  #     (spock? && other_move.lizard?) ||
+  #     (scissors? && other_move.spock?) ||
+  #     (lizard? && other_move.scissors?) ||
+  #     (paper? && other_move.lizard?) ||
+  #     (spock? && other_move.paper?) ||
+  #     (rock? && other_move.spock?) ||
+  #     (scissors? && other_move.rock?)
+  # end
 
   def to_s
     @value
+  end
+end
+
+class Rock < Move
+  def >(other)
+    other.class == Lizard || other.class == Scissors
+  end
+
+  def <(other)
+    other.class == Paper || other.class == Spock
+  end
+end
+
+class Paper < Move
+  def >(other)
+    other.class == Rock || other.class == Spock
+  end
+
+  def <(other)
+    other.class == Scissors || other.class == Lizard
+  end
+end
+
+class Scissors < Move
+  def >(other)
+    other.class == Paper || other.class == Lizard
+  end
+
+  def <(other)
+    other.class == Spock || other.class == Rock
+  end
+end
+
+class Lizard < Move
+  def >(other)
+    other.class == Spock || other.class == Paper
+  end
+
+  def <(other)
+    other.class == Rock || other.class == Scissors
+  end
+end
+
+class Spock < Move
+  def >(other)
+    other.class == Scissors || other.class == Rock
+  end
+
+  def <(other)
+    other.class == Lizard || other.class == Paper
   end
 end
 
@@ -68,6 +118,16 @@ class Player
     set_name
     @score = 0
   end
+
+  def new_move(choice)
+    case choice.downcase
+    when 'rock' then Rock.new(choice)
+    when 'paper' then Paper.new(choice)
+    when 'scissors' then Scissors.new(choice)
+    when 'lizard' then Lizard.new(choice)
+    when 'spock' then Spock.new(choice)
+    end
+  end
 end
 
 class Human < Player
@@ -77,6 +137,7 @@ class Human < Player
       puts "What's your name?"
       n = gets.chomp
       break unless n.empty?
+      clear_screen
       puts "Sorry, you must enter a value."
     end
     self.name = n
@@ -88,11 +149,11 @@ class Human < Player
     choice = nil
     loop do
       puts "Please choose #{Move::VALUES.join(', ')}"
-      choice = gets.chomp
+      choice = gets.chomp.downcase
       break if Move::VALUES.include?(choice)
       puts "Sorry, invalid choice."
     end
-    self.move = Move.new(choice)
+    self.move = new_move(choice)
   end
 end
 
@@ -102,7 +163,7 @@ class Computer < Player
   end
 
   def choose
-    self.move = Move.new(Move::VALUES.sample)
+    self.move = new_move(Move::VALUES.sample)
   end
 end
 
@@ -176,6 +237,9 @@ class RPSGame
   end
 
   def display_grand_winner
+    puts "Calculating final score..."
+    sleep(2)
+    clear_screen
     puts "After #{rounds - 1} rounds:"
     if human.score > computer.score
       puts "#{human.name} is the grand winner with #{human.score} wins!"
@@ -299,8 +363,13 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   change? Can you make it work? After you're done, can you talk about whether
   this was a good design decision? What are the pros/cons?
 
-  Notes:
-    -
+  Pros/cons:
+    - I did get it to work and it seems to be an OK design decision.
+    - Con: I had to add some additional complexity in order to instantiate the right
+        object since we can no longer just instantiate a single Move object.
+    - Pro: I was able to elimitate much of the code from the Move class
+    - Pro: I replaced the many or checks within the > and < Move instance methods
+      - Replaced these with simpler versions within each individual move subclass
 
 - Keep track of a history of moves
   As long as the user doesn't quit, keep track of a history of moves by both the

@@ -117,12 +117,36 @@ class Human < Player
 end
 
 class Computer < Player
+  attr_reader :computer_moves
+
+  def initialize
+    super
+    @computer_moves = generate_personality
+  end
+
   def set_name
     self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
   end
 
+  def generate_personality
+    case name
+    when 'R2D2'
+      ['rock']
+    when 'Hal'
+      %w(scissors scissors scissors scissors rock lizard lizard spock spock)
+    when 'Chappie'
+      %w(spock spock spock lizard lizard lizard rock paper scissors)
+    when 'Sonny'
+      %w(rock rock paper paper scissors scissors lizard lizard spock)
+    when 'Number 5'
+      %w(lizard spock)
+    else
+      %w(rock paper scissors lizard spock)
+    end
+  end
+
   def choose
-    self.move = new_move(Move::VALUES.sample)
+    self.move = new_move(computer_moves.sample)
     move_log << move
   end
 end
@@ -414,11 +438,16 @@ RPS Bonus Features (Instructions and my thoughts/notes)
   rules or personalities for each robot. How would you approach a feature like this?
 
   Notes:
-    -
+    - Build a robot personality engine
+      - Method that initializes a new set of move options for each robot
+      - An array with total number of possibilities X times the actual amount
+        so we can increase the probability of some
+      - Formula for each robot that defines the personality
 
 Other ideas (my own bonus features):
   - Accept single letter user inputs (just like old RPS game)
-  - "Rock paper scissors lizard, or spock" - add an 'and/or' method
+  - add an 'and/or' method - "Rock paper scissors lizard, or spock"
+  -
 
 - Notes from TA feedback on other code reviews:
   -

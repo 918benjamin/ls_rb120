@@ -99,15 +99,36 @@ class Human < Player
     self.name = n
   end
 
+  def valid_choice?(choice)
+    move_arr = Move::VALUES.select do |value|
+      value.start_with?(choice)
+    end
+
+    move_arr.count == 1
+  end
+
+  def format_choice(choice)
+    move_arr = Move::VALUES.select do |value|
+      value.start_with?(choice)
+    end
+
+    move_arr.first
+  end
+
   def choose
     choice = nil
     loop do
       puts "Please choose #{Move::VALUES.join(', ')}"
+      if move_log.empty? || choice
+        puts "Abbreviations are OK - use two letters for (sc)issors or (sp)ock"
+      end
+
       choice = gets.chomp.downcase
-      break if Move::VALUES.include?(choice)
+      break if valid_choice?(choice)
       puts "Sorry, invalid choice."
     end
 
+    choice = format_choice(choice)
     self.move = new_move(choice)
     move_log << move
   end
@@ -220,10 +241,9 @@ class RPSGame
   end
 
   def determine_grand_winner
-    clear_screen
     puts "Calculating final score..."
     sleep(2)
-    puts ""
+    clear_screen
 
     if human.score > computer.score
       human
@@ -249,12 +269,12 @@ class RPSGame
     loop do
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp.downcase
-      break if ['y', 'n'].include?(answer)
+      break if ['y', 'n', 'yes', 'no'].include?(answer)
       clear_screen
       puts "Sorry, must be y or n."
     end
 
-    answer == 'y'
+    answer.start_with?('y')
   end
 
   def stop_early?
@@ -263,12 +283,12 @@ class RPSGame
     loop do
       puts "Continue to next round? hit Enter to continue, `n` to stop early."
       answer = gets.chomp.downcase
-      break if ['', 'n'].include?(answer)
+      break if ['', 'n', 'no'].include?(answer)
       clear_screen
       puts "Sorry, only use Enter or n."
     end
     clear_screen
-    answer == 'n'
+    answer.start_with?('n')
   end
 
   def reset_rounds_and_scores
@@ -287,13 +307,13 @@ class RPSGame
     loop do
       puts "Would you like to view the round history? (y/n)"
       answer = gets.chomp.downcase
-      break if ['y', 'n'].include?(answer)
+      break if ['y', 'n', 'yes', 'no'].include?(answer)
       clear_screen
       puts "Sorry, must be y or n."
     end
     puts ""
 
-    answer == 'y'
+    answer.start_with?('y')
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength

@@ -464,7 +464,7 @@ RPS Bonus Features (Instructions and my thoughts/notes)
       - Formula for each robot that defines the personality
 
 Other ideas (my own bonus features):
-  - Accept single letter user inputs (just like old RPS game)
+  [x] Accept single letter user inputs (just like old RPS game)
   - add an 'and/or' method - "Rock paper scissors lizard, or spock"
   - Could refactor the three related methods into one with arguments
     - play_again? #stop_early? #view_move_log?
@@ -472,7 +472,7 @@ Other ideas (my own bonus features):
       Might be better to leave them as is for now
 
 - Notes from TA feedback on other code reviews:
-  -
+  [x] Accept abbreviations for human move input
 
 =end
 # rubocop:enable Layout/LineLength

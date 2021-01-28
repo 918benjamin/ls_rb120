@@ -48,10 +48,9 @@ class Board
 
   def winning_marker
     WINNING_LINES.each do |line|
-      if line.all? {|key| @squares[key].marker == TTTGame::HUMAN_MARKER}
-        return TTTGame::HUMAN_MARKER
-      elsif line.all? {|key| @squares[key].marker == TTTGame::COMPUTER_MARKER}
-        return TTTGame::COMPUTER_MARKER
+      line_markers = line.map { |key| @squares[key].marker }.uniq
+      if line_markers.count == 1 && line_markers.first != ' '
+        return line_markers.first
       end
     end
     nil

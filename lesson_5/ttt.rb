@@ -1,6 +1,3 @@
-require "pry"
-require "pry-byebug"
-
 module Clearable
   def clear_screen
     system("clear") || system("cls")
@@ -16,6 +13,8 @@ class Board
     reset
   end
 
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
   def draw
     puts "     |     |"
     puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
@@ -29,6 +28,8 @@ class Board
     puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
     puts "     |     |"
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   def []=(key, marker)
     @squares[key].marker = marker
@@ -63,7 +64,7 @@ end
 
 class Square
   INITIAL_MARKER = ' '
- 
+
   attr_accessor :marker
 
   def initialize(marker=INITIAL_MARKER)
@@ -106,26 +107,30 @@ class TTTGame
   def play
     clear_screen
     display_welcome_message
+    main_game
+    display_goodbye_message
+  end
 
+  private
+
+  def player_move
+    loop do
+      current_player_moves
+      break if board.someone_won? || board.full?
+      clear_screen_and_display_board if human_turn?
+    end
+  end
+
+  def main_game
     loop do
       display_board
-
-      loop do
-        current_player_moves
-        break if board.someone_won? || board.full?
-        clear_screen_and_display_board if human_turn?
-      end
-
+      player_move
       display_result
       break unless play_again?
       reset
       display_play_again_message
     end
-
-    display_goodbye_message
   end
-
-  private
 
   def display_welcome_message
     puts "Welcome to Tic Tac Toe!"
@@ -149,7 +154,7 @@ class TTTGame
   end
 
   def human_moves
-    puts "Choose a square (#{board.unmarked_keys.join(", ")}):"
+    puts "Choose a square (#{board.unmarked_keys.join(', ')}):"
     square = nil
     loop do
       square = gets.chomp.to_i

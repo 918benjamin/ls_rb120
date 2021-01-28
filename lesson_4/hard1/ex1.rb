@@ -30,9 +30,26 @@ helpful to review the lecture on collaborator objects for this practice problem.
 =end
 
 class SecretFile
-  attr_reader :data
-
-  def initialize(secret_data)
+  def initialize(secret_data, log)
     @data = secret_data
+    @log = log
+  end
+
+  def data
+    log.create_log_entry
+    @data
+  end
+
+  private
+
+  attr_accessor :log
+
+end
+
+class SecurityLogger
+  def create_log_entry
+    # ... implementation omitted ...
   end
 end
+
+secrets = SecretFile.new("my password is 12345", SecurityLogger.new)

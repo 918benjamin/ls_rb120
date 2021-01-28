@@ -30,7 +30,7 @@ class Board
     puts "     |     |"
   end
 
-  def set_square_at(key, marker)
+  def []=(key, marker)
     @squares[key].marker = marker
   end
 
@@ -130,11 +130,11 @@ class TTTGame
       break if board.unmarked_keys.include?(square)
       puts "Sorry, that's not a valid choice."
     end
-    board.set_square_at(square, human.marker)
+    board[square] = human.marker
   end
 
   def computer_moves
-    board.set_square_at(board.unmarked_keys.sample, computer.marker)
+    board[board.unmarked_keys.sample] = computer.marker
   end
 
   def display_result

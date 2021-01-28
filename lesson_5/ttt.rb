@@ -17,6 +17,12 @@ Square
 
 require "pry"
 
+module Clearable
+  def clear_screen
+    system("clear") || system("cls")
+  end
+end
+
 class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # columns
@@ -91,6 +97,9 @@ end
 class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
+
+  include Clearable
+
   attr_reader :board, :human, :computer
 
   def initialize
@@ -109,7 +118,7 @@ class TTTGame
   end
 
   def display_board(clear = true)
-    system("clear") || system("cls") if clear
+    clear_screen if clear
     puts "You're a #{human.marker}. Computer is a #{computer.marker}."
     puts ""
     puts "     |     |"
@@ -182,7 +191,7 @@ class TTTGame
       display_result
       break unless play_again?
       board.reset
-      system("clear") || system("cls")
+      clear_screen
       puts "Let's play again!"
       puts ""
     end

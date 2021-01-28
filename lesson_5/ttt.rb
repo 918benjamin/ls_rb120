@@ -1,21 +1,5 @@
-=begin
-Short description:
-Tic Tac Toe is a 2-player board game played on a 3x3 grid/board. Players take
-turns marking a square. The first player to mark 3 squares in a row wins.
-
-Nouns & Verbs
-Player
-  - mark
-  - play
-Board/Grid
-Square
-
-
-=end
-
-# Spike
-
 require "pry"
+require "pry-byebug"
 
 module Clearable
   def clear_screen
@@ -117,7 +101,7 @@ class TTTGame
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
   end
 
-  def display_board(clear = true)
+  def display_board(clear: true)
     clear_screen if clear
     puts "You're a #{human.marker}. Computer is a #{computer.marker}."
     puts ""
@@ -176,7 +160,7 @@ class TTTGame
     display_welcome_message
 
     loop do
-      display_board(false)
+      display_board(clear: false)
 
       loop do
         human_moves

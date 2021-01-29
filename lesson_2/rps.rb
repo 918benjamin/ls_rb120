@@ -120,7 +120,8 @@ class Human < Player
     loop do
       puts "Please choose #{Move::VALUES.join(', ')}"
       if move_log.empty? || choice
-        puts "Abbreviations are OK - use two letters for (sc)issors or (sp)ock"
+        puts "Single letter abbreviations are OK." +
+        " Use two letters for (sc)issors or (sp)ock"
       end
 
       choice = gets.chomp.downcase

@@ -23,7 +23,7 @@ class Move
   end
 
   def >(other)
-    beats.any? { |lesser_move| other.class == lesser_move } 
+    beats.any? { |lesser_move| other.class == lesser_move }
   end
 end
 
@@ -139,24 +139,17 @@ class Computer < Player
   attr_reader :computer_moves
 
   def initialize
-    super
     @personality = generate_personality
     @computer_moves = personality.moves
+    super
   end
 
   def set_name
-    self.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'Number 5'].sample
+    self.name = personality.name
   end
 
   def generate_personality
-    case name
-    when 'R2D2' then R2D2.new
-    when 'Hal' then Hal.new
-    when 'Chappie' then Chappie.new
-    when 'Sonny' then Sonny.new
-    when 'Number 5' then Number_5.new
-    else Personality.new
-    end
+    [R2D2.new, Hal.new, Chappie.new, Sonny.new, NumberFive.new].sample
   end
 
   def choose
@@ -165,20 +158,22 @@ class Computer < Player
   end
 
   private
+
   attr_reader :personality
 end
 
 class Personality
-  attr_reader :moves
+  attr_reader :moves, :name
 
-  MOVE_RATIOS = {rock: 0.2, paper: 0.2, scissors: 0.2, lizard: 0.2, spock: 0.2}
+  MOVE_RATIOS = { rock: 0.2, paper: 0.2, scissors: 0.2, lizard: 0.2,
+                  spock: 0.2 }
 
   def initialize
     @moves = generate_moves
+    @name = self.class.to_s
   end
 
   def generate_moves
-    # returns an array of the moves based on the ratios
     self.class::MOVE_RATIOS.each_with_object([]) do |(move, ratio), arr|
       (ratio * 100).to_i.times { arr << move.to_s }
     end
@@ -186,22 +181,24 @@ class Personality
 end
 
 class R2D2 < Personality
-  MOVE_RATIOS = {rock: 1, paper: 0, scissors: 0, lizard: 0, spock: 0}
+  MOVE_RATIOS = { rock: 1, paper: 0, scissors: 0, lizard: 0, spock: 0 }
 end
 class Hal < Personality
-  MOVE_RATIOS = {rock: 0.1, paper: 0, scissors: 0.6, lizard: 0.2, spock: 0.1}
+  MOVE_RATIOS = { rock: 0.1, paper: 0, scissors: 0.6, lizard: 0.2, spock: 0.1 }
 end
 
 class Chappie < Personality
-  MOVE_RATIOS = {rock: 0.15, paper: 0.15, scissors: 0.15, lizard: 0.4, spock: 0.15}
+  MOVE_RATIOS = { rock: 0.15, paper: 0.15, scissors: 0.15, lizard: 0.4,
+                  spock: 0.15 }
 end
 
 class Sonny < Personality
-  MOVE_RATIOS = {rock: 0.25, paper: 0.25, scissors: 0.25, lizard: 0.25, spock: 0}
+  MOVE_RATIOS = { rock: 0.25, paper: 0.25, scissors: 0.25, lizard: 0.25,
+                  spock: 0 }
 end
 
-class Number_5 < Personality
-  MOVE_RATIOS = {rock: 0, paper: 0, scissors: 0, lizard: 0.5, spock: 0.5}
+class NumberFive < Personality
+  MOVE_RATIOS = { rock: 0, paper: 0, scissors: 0, lizard: 0.5, spock: 0.5 }
 end
 
 # Game Orchestration Engine
@@ -213,14 +210,33 @@ class RPSGame
 
   include Clearable
 
-  attr_accessor :human, :computer, :rounds, :winner_log
-
   def initialize
     @human = Human.new
     @computer = Computer.new
     @rounds = 1
     @winner_log = []
   end
+
+  # rubocop:disable Metrics/MethodLength
+  def play
+    display_welcome_message
+    loop do
+      loop do
+        play_round
+        break if grand_winner? || stop_early?
+      end
+      display_grand_winner
+      display_move_history if view_move_log?
+      break unless play_again?
+      reset_rounds_and_scores
+    end
+    display_goodbye_message
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  private
+
+  attr_accessor :human, :computer, :rounds, :winner_log
 
   def display_welcome_message
     clear_screen
@@ -376,23 +392,7 @@ class RPSGame
     end
     puts ""
   end
-  # rubocop:enable Metrics/AbcSize
-
-  def play
-    display_welcome_message
-    loop do
-      loop do
-        play_round
-        break if grand_winner? || stop_early?
-      end
-      display_grand_winner
-      display_move_history if view_move_log?
-      break unless play_again?
-      reset_rounds_and_scores
-    end
-    display_goodbye_message
-  end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 end
 
 # Instantiate RPS object and invoke the #play method to begin the game

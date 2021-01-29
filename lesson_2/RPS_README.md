@@ -123,10 +123,9 @@ Code Review Feedback from Karl
 [x] Don't need both < & > methods in Move class (only used in RPSGame#determine_winner)
     - Eliminate need for one method by amending the elsif conditional expression:
       elsif computer.move > human.move
-[ ] Create subclasses for each of the computer personalities to match OO paradigm
+[x] Create subclasses for each of the computer personalities to match OO paradigm
     - The idea is to use objects for managing different behavior (vs conditional expressions)
-    [ ] Computer has @personality and #personality_generator method
-    [ ] #personality_generator method creates a new personality by ...?
-[ ] Implement method access control
+[x] Implement method access control
     - Many methods in RPSGame only called by other methods of RPSGame (make private)
 [x] Clear screen method should be in a module and then mixed into classes that need it
+[ ] Refactor the methods that are currently disabling rubocop cops

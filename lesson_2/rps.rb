@@ -204,9 +204,11 @@ end
 # Game Orchestration Engine
 class RPSGame
   WINNING_SCORE = 3
-  WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
-                   'destroyed', 'defeated', 'conquered', 'vanquished',
-                   'quashed']
+  # Removed WINNING_VERBS to appease Rubocop in RPSGame#display_rounds but left
+  # as a comment in for posterity
+  # WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
+  #                  'destroyed', 'defeated', 'conquered', 'vanquished',
+  #                  'quashed']
 
   include Clearable
 
@@ -377,25 +379,26 @@ class RPSGame
     answer.start_with?('y')
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def display_move_history
     puts ""
     puts "*****Round History*****"
+    display_rounds
+    puts ""
+  end
+
+  def display_rounds
     winner_log.each_with_index do |winner, index|
       round = index + 1
       if winner
         loser = (winner == human ? computer : human)
         puts "Round #{round}: #{winner.name}'s #{winner.move_log[index]}"\
-        " #{WINNING_VERBS.sample} #{loser.name}'s #{loser.move_log[index]}"
+        " beat #{loser.name}'s #{loser.move_log[index]}"
       else
-        puts "Round #{round}: You tied this round with "\
-        "#{human.move_log[index]}."
+        puts "Round #{round}: You tied with #{human.move_log[index]}."
       end
     end
-    puts ""
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 end
 
-# Instantiate RPS object and invoke the #play method to begin the game
+# Instantiate RPSGame object and invoke the #play method to begin the game
 RPSGame.new.play

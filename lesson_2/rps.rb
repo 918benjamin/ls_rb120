@@ -217,9 +217,17 @@ class RPSGame
     @winner_log = []
   end
 
-  # rubocop:disable Metrics/MethodLength
   def play
     display_welcome_message
+    main_game
+    display_goodbye_message
+  end
+
+  private
+
+  attr_accessor :human, :computer, :rounds, :winner_log
+
+  def main_game
     loop do
       loop do
         play_round
@@ -230,13 +238,7 @@ class RPSGame
       break unless play_again?
       reset_rounds_and_scores
     end
-    display_goodbye_message
   end
-  # rubocop:enable Metrics/MethodLength
-
-  private
-
-  attr_accessor :human, :computer, :rounds, :winner_log
 
   def display_welcome_message
     clear_screen

@@ -1,6 +1,3 @@
-require "pry"
-require "pry-byebug"
-
 module Clearable
   def clear_screen
     system "clear"

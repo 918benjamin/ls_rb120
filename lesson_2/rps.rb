@@ -8,62 +8,54 @@ end
 class Move
   VALUES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
 
+  attr_reader :beats
+
   def initialize(value)
     @value = value
+    @beats = nil
   end
 
   def to_s
     @value
   end
+
+  def >(other)
+    beats.any? { |lesser_move| other.class == lesser_move } 
+  end
 end
 
 class Rock < Move
-  def >(other)
-    other.class == Lizard || other.class == Scissors
-  end
-
-  def <(other)
-    other.class == Paper || other.class == Spock
+  def initialize(value)
+    super
+    @beats = [Lizard, Scissors]
   end
 end
 
 class Paper < Move
-  def >(other)
-    other.class == Rock || other.class == Spock
-  end
-
-  def <(other)
-    other.class == Scissors || other.class == Lizard
+  def initialize(value)
+    super
+    @beats = [Rock, Spock]
   end
 end
 
 class Scissors < Move
-  def >(other)
-    other.class == Paper || other.class == Lizard
-  end
-
-  def <(other)
-    other.class == Spock || other.class == Rock
+  def initialize(value)
+    super
+    @beats = [Paper, Lizard]
   end
 end
 
 class Lizard < Move
-  def >(other)
-    other.class == Spock || other.class == Paper
-  end
-
-  def <(other)
-    other.class == Rock || other.class == Scissors
+  def initialize(value)
+    super
+    @beats = [Spock, Paper]
   end
 end
 
 class Spock < Move
-  def >(other)
-    other.class == Scissors || other.class == Rock
-  end
-
-  def <(other)
-    other.class == Lizard || other.class == Paper
+  def initialize(value)
+    super
+    @beats = [Scissors, Rock]
   end
 end
 
@@ -227,7 +219,7 @@ class RPSGame
     winner = nil
     if human.move > computer.move
       winner = human
-    elsif human.move < computer.move
+    elsif computer.move > human.move
       winner = computer
     end
     winner_log << winner

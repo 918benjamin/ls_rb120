@@ -71,6 +71,8 @@ class Player
     @move_log = []
   end
 
+  private
+
   def new_move(choice)
     case choice
     when 'rock' then Rock.new(choice)
@@ -84,6 +86,36 @@ end
 
 class Human < Player
   include Clearable
+
+  def format_choice(choice)
+    move_arr = Move::VALUES.select do |value|
+      value.start_with?(choice)
+    end
+
+    move_arr.first
+  end
+
+  def choose
+    choice = prompt_for_choice
+    self.move = new_move(format_choice(choice))
+    move_log << move
+  end
+
+  private
+
+  def prompt_for_choice
+    loop do
+      puts "Please choose #{Move::VALUES.join(', ')}"
+      if move_log.empty?
+        puts "Single letter abbreviations are OK."\
+             " Use two letters for (sc)issors or (sp)ock"
+      end
+
+      choice = gets.chomp.downcase
+      return choice if valid_choice?(choice)
+      puts "Sorry, invalid choice."
+    end
+  end
 
   def set_name
     n = ''
@@ -105,34 +137,6 @@ class Human < Player
 
     move_arr.count == 1
   end
-
-  def format_choice(choice)
-    move_arr = Move::VALUES.select do |value|
-      value.start_with?(choice)
-    end
-
-    move_arr.first
-  end
-
-  def prompt_for_choice
-    loop do
-      puts "Please choose #{Move::VALUES.join(', ')}"
-      if move_log.empty?
-        puts "Single letter abbreviations are OK."\
-             " Use two letters for (sc)issors or (sp)ock"
-      end
-
-      choice = gets.chomp.downcase
-      return choice if valid_choice?(choice)
-      puts "Sorry, invalid choice."
-    end
-  end
-
-  def choose
-    choice = prompt_for_choice
-    self.move = new_move(format_choice(choice))
-    move_log << move
-  end
 end
 
 class Computer < Player
@@ -144,14 +148,6 @@ class Computer < Player
     super
   end
 
-  def set_name
-    self.name = personality.name
-  end
-
-  def generate_personality
-    [R2D2.new, Hal.new, Chappie.new, Sonny.new, NumberFive.new].sample
-  end
-
   def choose
     self.move = new_move(computer_moves.sample)
     move_log << move
@@ -160,18 +156,28 @@ class Computer < Player
   private
 
   attr_reader :personality
+
+  def set_name
+    self.name = personality.name
+  end
+
+  def generate_personality
+    [R2D2.new, Hal.new, Chappie.new, Sonny.new, NumberFive.new].sample
+  end
 end
 
 class Personality
-  attr_reader :moves, :name
-
   MOVE_RATIOS = { rock: 0.2, paper: 0.2, scissors: 0.2, lizard: 0.2,
                   spock: 0.2 }
+
+  attr_reader :moves, :name
 
   def initialize
     @moves = generate_moves
     @name = self.class.to_s
   end
+
+  private
 
   def generate_moves
     self.class::MOVE_RATIOS.each_with_object([]) do |(move, ratio), arr|
@@ -204,11 +210,6 @@ end
 # Game Orchestration Engine
 class RPSGame
   WINNING_SCORE = 3
-  # Removed WINNING_VERBS to appease Rubocop in RPSGame#display_rounds but left
-  # as a comment in for posterity
-  # WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
-  #                  'destroyed', 'defeated', 'conquered', 'vanquished',
-  #                  'quashed']
 
   include Clearable
 
@@ -375,12 +376,11 @@ class RPSGame
       puts "Sorry, must be y or n."
     end
     puts ""
-
     answer.start_with?('y')
   end
 
   def display_move_history
-    puts ""
+    clear_screen
     puts "*****Round History*****"
     display_rounds
     puts ""

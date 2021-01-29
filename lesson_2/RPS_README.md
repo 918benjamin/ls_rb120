@@ -128,5 +128,5 @@ Code Review Feedback from Karl
 [x] Implement method access control
     - Many methods in RPSGame only called by other methods of RPSGame (make private)
 [x] Clear screen method should be in a module and then mixed into classes that need it
-[ ] Refactor the methods that are currently disabling rubocop cops
+[x] Refactor the methods that are currently disabling rubocop cops
 [ ] Check for method access control in classes besides RPSGame

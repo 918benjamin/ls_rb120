@@ -115,22 +115,23 @@ class Human < Player
     move_arr.first
   end
 
-  def choose
-    choice = nil
+  def prompt_for_choice
     loop do
       puts "Please choose #{Move::VALUES.join(', ')}"
-      if move_log.empty? || choice
-        puts "Single letter abbreviations are OK." +
-        " Use two letters for (sc)issors or (sp)ock"
+      if move_log.empty?
+        puts "Single letter abbreviations are OK."\
+             " Use two letters for (sc)issors or (sp)ock"
       end
 
       choice = gets.chomp.downcase
-      break if valid_choice?(choice)
+      return choice if valid_choice?(choice)
       puts "Sorry, invalid choice."
     end
+  end
 
-    choice = format_choice(choice)
-    self.move = new_move(choice)
+  def choose
+    choice = prompt_for_choice
+    self.move = new_move(format_choice(choice))
     move_log << move
   end
 end

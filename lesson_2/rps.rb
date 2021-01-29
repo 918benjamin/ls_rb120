@@ -1,6 +1,8 @@
-def clear_screen
-  system "clear"
-  system "cls"
+module Clearable
+  def clear_screen
+    system "clear"
+    system "cls"
+  end
 end
 
 class Move
@@ -86,6 +88,8 @@ class Player
 end
 
 class Human < Player
+  include Clearable
+
   def set_name
     n = ''
     clear_screen
@@ -171,6 +175,8 @@ class RPSGame
   WINNING_VERBS = ['crushed', 'beat', 'obliterated', 'annihilated', 'trounced',
                    'destroyed', 'defeated', 'conquered', 'vanquished',
                    'quashed']
+
+  include Clearable
 
   attr_accessor :human, :computer, :rounds, :winner_log
 

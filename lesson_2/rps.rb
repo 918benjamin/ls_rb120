@@ -1,3 +1,6 @@
+require "pry"
+require "pry-byebug"
+
 module Clearable
   def clear_screen
     system "clear"
@@ -137,7 +140,8 @@ class Computer < Player
 
   def initialize
     super
-    @computer_moves = generate_personality
+    @personality = generate_personality
+    @computer_moves = personality.moves
   end
 
   def set_name
@@ -146,12 +150,12 @@ class Computer < Player
 
   def generate_personality
     case name
-    when 'R2D2' then ['rock']
-    when 'Hal' then %w(scissors scissors scissors rock lizard lizard spock)
-    when 'Chappie' then %w(spock spock lizard lizard lizard rock paper scissors)
-    when 'Sonny' then %w(rock rock paper paper scissors scissors lizard lizard)
-    when 'Number 5' then %w(lizard spock)
-    else %w(rock paper scissors lizard spock)
+    when 'R2D2' then R2D2.new # ['rock']
+    when 'Hal' then Hal.new # %w(scissors scissors scissors rock lizard lizard spock)
+    when 'Chappie' then Chappie.new # %w(spock spock lizard lizard lizard rock paper scissors)
+    when 'Sonny' then Sonny.new # %w(rock rock paper paper scissors scissors lizard lizard)
+    when 'Number 5' then Number_5.new # %w(lizard spock)
+    else Personality.new # %w(rock paper scissors lizard spock)
     end
   end
 
@@ -159,6 +163,45 @@ class Computer < Player
     self.move = new_move(computer_moves.sample)
     move_log << move
   end
+
+  private
+  attr_reader :personality
+end
+
+class Personality
+  attr_reader :moves
+
+  MOVE_RATIOS = {rock: 0.2, paper: 0.2, scissors: 0.2, lizard: 0.2, spock: 0.2}
+
+  def initialize
+    @moves = generate_moves
+  end
+
+  def generate_moves
+    # returns an array of the moves based on the ratios
+    self.class::MOVE_RATIOS.each_with_object([]) do |(move, ratio), arr|
+      (ratio * 100).to_i.times { arr << move.to_s }
+    end
+  end
+end
+
+class R2D2 < Personality
+  MOVE_RATIOS = {rock: 1, paper: 0, scissors: 0, lizard: 0, spock: 0}
+end
+class Hal < Personality
+  MOVE_RATIOS = {rock: 0.1, paper: 0, scissors: 0.6, lizard: 0.2, spock: 0.1}
+end
+
+class Chappie < Personality
+  MOVE_RATIOS = {rock: 0.15, paper: 0.15, scissors: 0.15, lizard: 0.4, spock: 0.15}
+end
+
+class Sonny < Personality
+  MOVE_RATIOS = {rock: 0.25, paper: 0.25, scissors: 0.25, lizard: 0.25, spock: 0}
+end
+
+class Number_5 < Personality
+  MOVE_RATIOS = {rock: 0, paper: 0, scissors: 0, lizard: 0.5, spock: 0.5}
 end
 
 # Game Orchestration Engine

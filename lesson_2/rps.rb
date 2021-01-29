@@ -150,12 +150,12 @@ class Computer < Player
 
   def generate_personality
     case name
-    when 'R2D2' then R2D2.new # ['rock']
-    when 'Hal' then Hal.new # %w(scissors scissors scissors rock lizard lizard spock)
-    when 'Chappie' then Chappie.new # %w(spock spock lizard lizard lizard rock paper scissors)
-    when 'Sonny' then Sonny.new # %w(rock rock paper paper scissors scissors lizard lizard)
-    when 'Number 5' then Number_5.new # %w(lizard spock)
-    else Personality.new # %w(rock paper scissors lizard spock)
+    when 'R2D2' then R2D2.new
+    when 'Hal' then Hal.new
+    when 'Chappie' then Chappie.new
+    when 'Sonny' then Sonny.new
+    when 'Number 5' then Number_5.new
+    else Personality.new
     end
   end
 

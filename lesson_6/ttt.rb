@@ -4,10 +4,22 @@ module Clearable
   end
 end
 
+module Joinable
+  def joinor(arr, delimiter=', ', conjunction='or')
+    if arr.size < 2
+      arr.join(delimiter)
+    else
+      last_item = arr.pop
+      arr.join(delimiter) + delimiter + conjunction + ' ' + last_item.to_s
+    end
+  end
+end
+
 class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # columns
                   [[1, 5, 9], [3, 5, 7]]              # diagonals
+
   def initialize
     @squares = {}
     reset
@@ -93,7 +105,7 @@ class TTTGame
   COMPUTER_MARKER = "O"
   FIRST_TO_MOVE = HUMAN_MARKER
 
-  include Clearable
+  include Clearable, Joinable
 
   attr_reader :board, :human, :computer, :current_player
 
@@ -148,13 +160,17 @@ class TTTGame
     puts ""
   end
 
+  def display_unmarked_keys
+    joinor(board.unmarked_keys)
+  end
+
   def clear_screen_and_display_board
     clear_screen
     display_board
   end
 
   def human_moves
-    puts "Choose a square (#{board.unmarked_keys.join(', ')}):"
+    puts "Choose a square (#{display_unmarked_keys}):"
     square = nil
     loop do
       square = gets.chomp.to_i

@@ -17,6 +17,15 @@ joinor([1, 2, 3], ', ', 'and')   # => "1, 2, and 3"
 
 Then, use this method in the TTT game when prompting the user to mark a square.
 
+Notes:
+  - Decided to implement this #joinor method within the Joinable module for reuse
+    later as needed and to fit with the OO paradigm
+  - Mixed Joinable module into RPSGame class and defined a new RPSGame instance method
+    \#display_unmarked_keys which makes use of the joinor method. Added this method
+    to the RPSGame class instead of the board because all the other display methods
+    are within this class and this way the Board class can remain agnostic in terms
+    of how the board is displayed (for other games, for example)
+
 ## 2. Keep Score
 Keep score of how many times the player and computer each win. Don't use global or instance variables. Make it so that the first player to 5 wins the game.
 

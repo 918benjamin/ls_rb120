@@ -29,6 +29,24 @@ Notes:
 ## 2. Keep Score
 Keep score of how many times the player and computer each win. Don't use global or instance variables. Make it so that the first player to 5 wins the game.
 
+Checklist
+  [x] Constant to keep track of game winning score (WINNING_ROUNDS = 5)
+  [x] A structure to store the score of each Player (Human and Computer)
+    - Added an instance variable @score to Player class, initialized to 0
+  [x] a mechanism for updating the score of the winning Player each round
+  [x] a mechanism for checking if the grand winning score has been reached
+      by either player (compare player scores to the winning rounds number)
+  [x] a mechanism for asking the player if they want to continue to the
+      next round or stop early
+  [x] a mechanism for displaying the grand winner
+      [x] display grand winner needs to reflect quitting early (ties)
+  [x] a mechanism for restarting the whole game (adapt existing)
+  [x] update the intro messaging to say how many rounds constitute a game
+      "first to 10 games wins" for example
+  [x] a mechanism to display the score and round number
+  [x] keep track of total rounds (RPSGame instance variable?)
+  [x] Refactor reset method with any necessary changes
+
 ## 3. Computer AI: Defense
 The computer currently picks a square at random. That's not very interesting. Let's make the computer defensive minded, so that if there's an immediate threat, then it will defend the 3rd square. We'll consider an "immediate threat" to be 2 squares marked by the opponent in a row. If there's no immediate threat, then it will just pick a random square.
 

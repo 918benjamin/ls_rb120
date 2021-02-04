@@ -94,9 +94,11 @@ end
 
 class Player
   attr_reader :marker
+  attr_accessor :score
 
   def initialize(marker)
     @marker = marker
+    @score = 0
   end
 end
 
@@ -104,16 +106,19 @@ class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
   FIRST_TO_MOVE = HUMAN_MARKER
+  WINNING_ROUNDS = 5
 
   include Clearable, Joinable
 
   attr_reader :board, :human, :computer, :current_player
+  attr_accessor :rounds
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
     @current_player = FIRST_TO_MOVE
+    @rounds = 1
   end
 
   def play
@@ -133,24 +138,77 @@ class TTTGame
     end
   end
 
-  def main_game
+  def play_rounds
     loop do
+      display_round_and_scores
       display_board
       player_move
       display_result
+      increment_score_and_rounds
+      break if stop_early? || grand_winner?
+      reset_round
+    end
+  end
+
+  def main_game
+    loop do
+      play_rounds
+      display_grand_winner
       break unless play_again?
-      reset
       display_play_again_message
+      reset_game
+    end
+  end
+
+  def grand_winner?
+    human.score == WINNING_ROUNDS || computer.score == WINNING_ROUNDS
+  end
+
+  def determine_grand_winner
+    case human.score <=> computer.score
+    when 1 then 'player'
+    when -1 then 'computer'
+    when 0 then 'tie'
+    end
+  end
+
+  def increment_score_and_rounds
+    case board.winning_marker
+    when human.marker then human.score += 1
+    when computer.marker then computer.score += 1
+    end
+    self.rounds += 1
+  end
+
+  def display_grand_winner
+    clear_screen
+    puts "After #{rounds} games:"
+    case determine_grand_winner
+    when 'player'
+      puts "You are the grand winner with #{human.score} wins!"
+    when 'computer'
+      puts "Computer is the grand winner this time with #{computer.score} wins."
+    when 'tie'
+      puts "It's a tie. Bummer!"
     end
   end
 
   def display_welcome_message
     puts "Welcome to Tic Tac Toe!"
     puts ""
+    puts "First one to #{WINNING_ROUNDS} is the grand winner!"
+    puts ""
   end
 
   def display_goodbye_message
+    clear_screen
     puts "Thanks for playing Tic Tac Toe! Goodbye!"
+  end
+
+  def display_round_and_scores
+    puts "**** Game #{rounds} ****"
+    puts "Scores: You've won #{human.score}, computer has won #{computer.score}"
+    puts ""
   end
 
   def display_board
@@ -195,6 +253,7 @@ class TTTGame
   end
 
   def display_result
+    clear_screen
     display_board
 
     case board.winning_marker
@@ -206,6 +265,7 @@ class TTTGame
 
   def play_again?
     answer = nil
+    puts ""
     loop do
       puts "Would you like to play again? (y/n)"
       answer = gets.chomp.downcase
@@ -216,10 +276,31 @@ class TTTGame
     answer.start_with?('y')
   end
 
-  def reset
+  def stop_early?
+    answer = nil
+
+    loop do
+      puts "Continue to next round? hit Enter to continue, (n)o to stop early."
+      answer = gets.chomp.downcase
+      break if ['', 'n', 'no'].include?(answer)
+      clear_screen
+      puts "Sorry, only use Enter or no (n works too)."
+    end
+    # clear_screen
+    answer.start_with?('n')
+  end
+
+  def reset_round
     board.reset
     @current_player = FIRST_TO_MOVE
     clear_screen
+  end
+
+  def reset_game
+    reset_round
+    human.score = 0
+    computer.score = 0
+    self.rounds = 1
   end
 
   def display_play_again_message

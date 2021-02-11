@@ -281,6 +281,8 @@ class TTTGame
   def computer_moves
     if chance_to_win? || immediate_threat?
       board[computer.next_best_move] = computer.marker
+    elsif board[5].unmarked?
+      board[5] = computer.marker
     else
       board[board.unmarked_keys.sample] = computer.marker
     end

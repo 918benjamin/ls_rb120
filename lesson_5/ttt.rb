@@ -107,6 +107,15 @@ class Player
   end
 end
 
+class Computer < Player
+  attr_accessor :next_best_move
+
+  def initialize(marker)
+    super
+    @next_best_move = nil
+  end
+end
+
 class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
@@ -116,15 +125,14 @@ class TTTGame
   include Clearable, Joinable
 
   attr_reader :board, :human, :computer, :current_player
-  attr_accessor :rounds, :defensive_move
+  attr_accessor :rounds
 
   def initialize
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @computer = Computer.new(COMPUTER_MARKER)
     @current_player = FIRST_TO_MOVE
     @rounds = 0
-    @defensive_move = nil
   end
 
   def play
@@ -249,29 +257,34 @@ class TTTGame
   end
 
   def immediate_threat?
-    detect_threat
-    defensive_move
+    detect_best_move(human)
+    computer.next_best_move
   end
 
-  def detect_threat
+  def detect_best_move(player)
     board.class::WINNING_LINES.each do |line|
-      opponent_squares = line.count { |key| board[key].marker == human.marker }
+      taken_squares = line.count { |key| board[key].marker == player.marker }
 
-      if opponent_squares == 2
+      if taken_squares == 2
         line.each do |key|
-          self.defensive_move = key if board[key].unmarked?
+          computer.next_best_move = key if board[key].unmarked?
         end
       end
     end
   end
 
+  def chance_to_win?
+    detect_best_move(computer)
+    computer.next_best_move
+  end
+
   def computer_moves
-    if immediate_threat?
-      board[defensive_move] = computer.marker
+    if chance_to_win? || immediate_threat?
+      board[computer.next_best_move] = computer.marker
     else
       board[board.unmarked_keys.sample] = computer.marker
     end
-    self.defensive_move = nil
+    computer.next_best_move = nil
   end
 
   def current_player_moves

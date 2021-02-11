@@ -119,7 +119,7 @@ end
 class TTTGame
   HUMAN_MARKER = "X"
   COMPUTER_MARKER = "O"
-  FIRST_TO_MOVE = HUMAN_MARKER
+  FIRST_TO_MOVE = 'choose'
   WINNING_ROUNDS = 5
 
   include Clearable, Joinable
@@ -131,18 +131,42 @@ class TTTGame
     @board = Board.new
     @human = Player.new(HUMAN_MARKER)
     @computer = Computer.new(COMPUTER_MARKER)
-    @current_player = FIRST_TO_MOVE
     @rounds = 0
   end
 
   def play
     clear_screen
     display_welcome_message
+    @current_player = assign_first_player
     main_game
     display_goodbye_message
   end
 
   private
+
+  def assign_first_player
+    case FIRST_TO_MOVE
+    when HUMAN_MARKER, COMPUTER_MARKER then FIRST_TO_MOVE
+    when 'choose'
+      case human_choose_first_player[0]
+      when 'm' then HUMAN_MARKER
+      when 'c' then COMPUTER_MARKER
+      end
+    end
+  end
+
+  def human_choose_first_player
+    puts ""
+    choice = nil
+    loop do
+      puts "Who should go first? Enter (m)e or (c)omputer:"
+      choice = gets.chomp.downcase
+      break if ['m', 'me', 'c', 'computer'].include?(choice)
+      clear_screen
+      puts "Please enter either me or computer (m or c, for short)."
+    end
+    choice
+  end
 
   def player_move
     loop do
@@ -279,14 +303,13 @@ class TTTGame
   end
 
   def computer_moves
-    if chance_to_win? || immediate_threat?
-      board[computer.next_best_move] = computer.marker
-    elsif board[5].unmarked?
-      board[5] = computer.marker
-    else
-      board[board.unmarked_keys.sample] = computer.marker
-    end
-    computer.next_best_move = nil
+    computer.marker = if chance_to_win? || immediate_threat?
+                        board[computer.next_best_move]
+                      elsif board[5].unmarked?
+                        board[5]
+                      else
+                        board[board.unmarked_keys.sample]
+                      end
   end
 
   def current_player_moves
@@ -297,6 +320,7 @@ class TTTGame
       computer_moves
       @current_player = HUMAN_MARKER
     end
+    computer.next_best_move = nil
   end
 
   def display_result

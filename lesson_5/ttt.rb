@@ -1,3 +1,6 @@
+require "pry"
+require "pry-byebug"
+
 module Clearable
   def clear_screen
     system("clear") || system("cls")
@@ -25,8 +28,7 @@ class Board
     reset
   end
 
-  # rubocop:disable Metrics/AbcSize
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def draw
     puts "     |     |"
     puts "  #{@squares[1]}  |  #{@squares[2]}  |  #{@squares[3]}"
@@ -40,11 +42,14 @@ class Board
     puts "  #{@squares[7]}  |  #{@squares[8]}  |  #{@squares[9]}"
     puts "     |     |"
   end
-  # rubocop:enable Metrics/AbcSize
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def []=(key, marker)
     @squares[key].marker = marker
+  end
+
+  def [](key)
+    @squares[key]
   end
 
   def unmarked_keys
@@ -111,7 +116,7 @@ class TTTGame
   include Clearable, Joinable
 
   attr_reader :board, :human, :computer, :current_player
-  attr_accessor :rounds
+  attr_accessor :rounds, :defensive_move
 
   def initialize
     @board = Board.new
@@ -119,6 +124,7 @@ class TTTGame
     @computer = Player.new(COMPUTER_MARKER)
     @current_player = FIRST_TO_MOVE
     @rounds = 0
+    @defensive_move = nil
   end
 
   def play
@@ -242,8 +248,35 @@ class TTTGame
     board[square] = human.marker
   end
 
+  def immediate_threat? # return true if one winning line has 2 opponent markers and an empty space
+    detect_threat
+    defensive_move
+  end
+
+  def detect_threat
+    board.class::WINNING_LINES.each do |line|
+      opponent_squares = 0
+      open_square = nil
+      
+      line.each do |key|
+        if board[key].marker == human.marker
+          opponent_squares += 1
+        elsif board[key].unmarked?
+          open_square = key
+        end
+      end
+
+      self.defensive_move = open_square if opponent_squares == 2 && open_square
+    end
+  end
+
   def computer_moves
-    board[board.unmarked_keys.sample] = computer.marker
+    if immediate_threat?
+      board[defensive_move] = computer.marker
+    else
+      board[board.unmarked_keys.sample] = computer.marker
+    end
+    self.defensive_move = nil
   end
 
   def current_player_moves

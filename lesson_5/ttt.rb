@@ -118,7 +118,7 @@ class TTTGame
     @human = Player.new(HUMAN_MARKER)
     @computer = Player.new(COMPUTER_MARKER)
     @current_player = FIRST_TO_MOVE
-    @rounds = 1
+    @rounds = 0
   end
 
   def play
@@ -140,11 +140,12 @@ class TTTGame
 
   def play_rounds
     loop do
+      increment_rounds
       display_round_and_scores
       display_board
       player_move
       display_result
-      increment_score_and_rounds
+      increment_scores
       break if stop_early? || grand_winner?
       reset_round
     end
@@ -172,11 +173,14 @@ class TTTGame
     end
   end
 
-  def increment_score_and_rounds
+  def increment_scores
     case board.winning_marker
     when human.marker then human.score += 1
     when computer.marker then computer.score += 1
     end
+  end
+
+  def increment_rounds
     self.rounds += 1
   end
 
@@ -300,7 +304,7 @@ class TTTGame
     reset_round
     human.score = 0
     computer.score = 0
-    self.rounds = 1
+    self.rounds = 0
   end
 
   def display_play_again_message

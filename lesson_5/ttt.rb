@@ -248,25 +248,20 @@ class TTTGame
     board[square] = human.marker
   end
 
-  def immediate_threat? # return true if one winning line has 2 opponent markers and an empty space
+  def immediate_threat?
     detect_threat
     defensive_move
   end
 
   def detect_threat
     board.class::WINNING_LINES.each do |line|
-      opponent_squares = 0
-      open_square = nil
-      
-      line.each do |key|
-        if board[key].marker == human.marker
-          opponent_squares += 1
-        elsif board[key].unmarked?
-          open_square = key
+      opponent_squares = line.count { |key| board[key].marker == human.marker }
+
+      if opponent_squares == 2
+        line.each do |key|
+          self.defensive_move = key if board[key].unmarked?
         end
       end
-
-      self.defensive_move = open_square if opponent_squares == 2 && open_square
     end
   end
 

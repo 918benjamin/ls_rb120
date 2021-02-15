@@ -119,10 +119,6 @@ When you have a bigger board, you can perhaps add more than 2 players. Would it 
 
 ## Final Checklist
 [x] Run Rubocop and fix any issues
-[ ] Method access control - only expose necessary methods publicly
-[ ] OOP design 
-  [ ] Refactor duplicate code into a class or module to inherit and override
-  [ ] Create CRC cards to reflect on structure
-  [ ] Refactor dependencies so less objects know about each other
+[x] Method access control - only expose necessary methods publicly
 [ ] Final rubocop run and fix
 [ ] Remove any comments and binding.pry and require pry/byebug

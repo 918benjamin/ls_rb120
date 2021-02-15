@@ -145,7 +145,8 @@ class TTTGame
 
   def assign_first_player
     @first_player = case FIRST_TO_MOVE
-                      when "human", "computer" then FIRST_TO_MOVE
+                      when 'human' then human.marker
+                      when 'computer' then computer.marker
                       when 'choose'
                         case human_choose_first_player[0]
                         when 'm' then human.marker

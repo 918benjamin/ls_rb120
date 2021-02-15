@@ -1,6 +1,3 @@
-require "pry"
-require "pry-byebug"
-
 module Clearable
   def clear_screen
     system("clear") || system("cls")
@@ -166,31 +163,40 @@ class TTTGame
     @first_player = case FIRST_TO_MOVE
                     when 'human' then human.marker
                     when 'computer' then computer.marker
-                    when 'choose'
-                      case human_choose_first_player[0]
-                      when "#{human.name[0].downcase}" then human.marker
-                      when "#{computer.name[0].downcase}" then computer.marker
-                      end
+                    when 'choose' then choose_first_player
                     end
-    @current_player = @first_player
+  end
+
+  def choose_first_player
+    case human_choose_first_player[0]
+    when human.name[0].downcase then human.marker
+    when computer.name[0].downcase then computer.marker
+    end
   end
 
   def human_choose_first_player
-    puts ""
     choice = nil
     loop do
-      puts "Who should go first? Enter (#{human.name[0]})#{human.name[1..-1]}"\
-           " or (#{computer.name[0]})#{computer.name[1..-1]}"
+      puts "Who should go first? Enter #{formatted_name_selection}."
       choice = gets.chomp.downcase
-      break if [human.name[0].downcase, 
-                human.name.downcase,
-                computer.name[0].downcase,
-                computer.name.downcase].include?(choice)
+      break if name_selection.include?(choice)
       clear_screen
       puts "Please enter either #{human.name} or #{computer.name}"\
            " or just the first letter of either name."
     end
     choice
+  end
+
+  def formatted_name_selection
+    "(#{name_selection[0].upcase})#{name_selection[1][1..-1]} or"\
+    " (#{name_selection[2].upcase})#{name_selection[3][1..-1]}"
+  end
+
+  def name_selection
+    [human.name[0].downcase,
+     human.name.downcase,
+     computer.name[0].downcase,
+     computer.name.downcase]
   end
 
   def assign_markers
@@ -235,6 +241,7 @@ class TTTGame
   end
 
   def main_game
+    @current_player = @first_player
     loop do
       play_rounds
       display_grand_winner
@@ -271,10 +278,10 @@ class TTTGame
     clear_screen
     puts "After #{rounds} games:"
     case determine_grand_winner
-    when 'player'
-      puts "You, #{human.name}, are the grand winner with #{human.score} wins!"
-    when 'computer'
-      puts "#{computer.name} is the grand winner this time with #{computer.score} wins."
+    when 'player' then puts "Congrats, #{human.name}! You are the grand winner"\
+                            " with #{human.score} wins!"
+    when 'computer' then puts "#{computer.name} is the grand winner this time"\
+                              " with #{computer.score} wins."
     when 'tie'
       puts "It's a tie. Bummer!"
     end

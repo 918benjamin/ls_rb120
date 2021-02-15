@@ -118,7 +118,7 @@ When you have a bigger board, you can perhaps add more than 2 players. Would it 
 
 
 ## Final Checklist
-[ ] Run Rubocop and fix any issues
+[x] Run Rubocop and fix any issues
 [ ] Method access control - only expose necessary methods publicly
 [ ] OOP design 
   [ ] Refactor duplicate code into a class or module to inherit and override

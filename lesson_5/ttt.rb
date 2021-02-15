@@ -98,7 +98,7 @@ class Square
 end
 
 class Player
-  attr_accessor :score, :marker
+  attr_accessor :score, :marker, :name
 
   def initialize
     @score = 0
@@ -133,7 +133,7 @@ class TTTGame
   end
 
   def play
-    clear_screen
+    assign_names
     display_welcome_message
     assign_markers
     assign_first_player
@@ -143,14 +143,33 @@ class TTTGame
 
   private
 
+  def assign_names
+    clear_screen
+    human.name = ask_player_name
+    computer.name = ['R2D2', 'Hal', 'Chappie', 'Sonny', 'NumberFive'].sample
+  end
+
+  def ask_player_name
+    puts ""
+    name = nil
+    loop do
+      puts "What's your name, friend?"
+      name = gets.chomp
+      break unless name.empty?
+      clear_screen
+      puts "Surely that's not it... what do people call you?"
+    end
+    name
+  end
+
   def assign_first_player
     @first_player = case FIRST_TO_MOVE
                     when 'human' then human.marker
                     when 'computer' then computer.marker
                     when 'choose'
                       case human_choose_first_player[0]
-                      when 'm' then human.marker
-                      when 'c' then computer.marker
+                      when "#{human.name[0].downcase}" then human.marker
+                      when "#{computer.name[0].downcase}" then computer.marker
                       end
                     end
     @current_player = @first_player
@@ -160,11 +179,16 @@ class TTTGame
     puts ""
     choice = nil
     loop do
-      puts "Who should go first? Enter (m)e or (c)omputer:"
+      puts "Who should go first? Enter (#{human.name[0]})#{human.name[1..-1]}"\
+           " or (#{computer.name[0]})#{computer.name[1..-1]}"
       choice = gets.chomp.downcase
-      break if ['m', 'me', 'c', 'computer'].include?(choice)
+      break if [human.name[0].downcase, 
+                human.name.downcase,
+                computer.name[0].downcase,
+                computer.name.downcase].include?(choice)
       clear_screen
-      puts "Please enter either me or computer (m or c, for short)."
+      puts "Please enter either #{human.name} or #{computer.name}"\
+           " or just the first letter of either name."
     end
     choice
   end
@@ -248,34 +272,39 @@ class TTTGame
     puts "After #{rounds} games:"
     case determine_grand_winner
     when 'player'
-      puts "You are the grand winner with #{human.score} wins!"
+      puts "You, #{human.name}, are the grand winner with #{human.score} wins!"
     when 'computer'
-      puts "Computer is the grand winner this time with #{computer.score} wins."
+      puts "#{computer.name} is the grand winner this time with #{computer.score} wins."
     when 'tie'
       puts "It's a tie. Bummer!"
     end
   end
 
   def display_welcome_message
-    puts "Welcome to Tic Tac Toe!"
+    clear_screen
+    puts "Welcome to Tic Tac Toe, #{human.name}!"
     puts ""
-    puts "First one to #{WINNING_ROUNDS} is the grand winner!"
+    puts "You are playing against #{computer.name}, the meanest TicTacToe"\
+         " bot around!"
+    puts ""
+    puts "The first of you to reach #{WINNING_ROUNDS} wins is the grand winner!"
     puts ""
   end
 
   def display_goodbye_message
     clear_screen
-    puts "Thanks for playing Tic Tac Toe! Goodbye!"
+    puts "Thanks for playing Tic Tac Toe, #{human.name}! Goodbye!"
   end
 
   def display_round_and_scores
     puts "**** Game #{rounds} ****"
-    puts "Scores: You've won #{human.score}, computer has won #{computer.score}"
+    puts "Scores: #{human.name} has #{human.score},"\
+    " #{computer.name} has #{computer.score}"
     puts ""
   end
 
   def display_board
-    puts "You're a #{human.marker}. Computer is a #{computer.marker}."
+    puts "You're a #{human.marker}. #{computer.name} is a #{computer.marker}."
     puts ""
     board.draw
     puts ""

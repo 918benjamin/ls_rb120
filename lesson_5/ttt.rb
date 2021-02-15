@@ -98,11 +98,9 @@ class Square
 end
 
 class Player
-  attr_reader :marker
-  attr_accessor :score
+  attr_accessor :score, :marker
 
-  def initialize(marker)
-    @marker = marker
+  def initialize
     @score = 0
   end
 end
@@ -110,15 +108,14 @@ end
 class Computer < Player
   attr_accessor :next_best_move
 
-  def initialize(marker)
+  def initialize
     super
     @next_best_move = nil
   end
 end
 
 class TTTGame
-  HUMAN_MARKER = "X"
-  COMPUTER_MARKER = "O"
+  MARKER_OPTIONS = ["X", "O"]
   FIRST_TO_MOVE = 'choose'
   WINNING_ROUNDS = 5
 
@@ -129,15 +126,17 @@ class TTTGame
 
   def initialize
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Computer.new(COMPUTER_MARKER)
+    @human = Player.new
+    @computer = Computer.new
     @rounds = 0
+    @first_player = nil
   end
 
   def play
     clear_screen
     display_welcome_message
-    @current_player = assign_first_player
+    assign_markers
+    assign_first_player
     main_game
     display_goodbye_message
   end
@@ -145,14 +144,15 @@ class TTTGame
   private
 
   def assign_first_player
-    case FIRST_TO_MOVE
-    when HUMAN_MARKER, COMPUTER_MARKER then FIRST_TO_MOVE
-    when 'choose'
-      case human_choose_first_player[0]
-      when 'm' then HUMAN_MARKER
-      when 'c' then COMPUTER_MARKER
-      end
-    end
+    @first_player = case FIRST_TO_MOVE
+                      when "human", "computer" then FIRST_TO_MOVE
+                      when 'choose'
+                        case human_choose_first_player[0]
+                        when 'm' then human.marker
+                        when 'c' then computer.marker
+                        end
+                      end
+    @current_player = @first_player
   end
 
   def human_choose_first_player
@@ -164,6 +164,26 @@ class TTTGame
       break if ['m', 'me', 'c', 'computer'].include?(choice)
       clear_screen
       puts "Please enter either me or computer (m or c, for short)."
+    end
+    choice
+  end
+
+  def assign_markers
+    human.marker = choose_marker
+    marker_options = MARKER_OPTIONS.clone
+    marker_options.delete(human.marker)
+    computer.marker = marker_options.first
+  end
+
+  def choose_marker
+    puts ""
+    choice = nil
+    loop do
+      puts "Would you like to play with X or O?"
+      choice = gets.chomp.upcase
+      break if MARKER_OPTIONS.include?(choice)
+      clear_screen
+      puts "Please enter either X or O."
     end
     choice
   end
@@ -303,22 +323,23 @@ class TTTGame
   end
 
   def computer_moves
-    computer.marker = if chance_to_win? || immediate_threat?
-                        board[computer.next_best_move]
-                      elsif board[5].unmarked?
-                        board[5]
-                      else
-                        board[board.unmarked_keys.sample]
-                      end
+    square = if chance_to_win? || immediate_threat?
+               computer.next_best_move
+             elsif board[5].unmarked?
+              5
+             else
+               board.unmarked_keys.sample
+             end
+    board[square] = computer.marker  
   end
 
   def current_player_moves
     if human_turn?
       human_moves
-      @current_player = COMPUTER_MARKER
+      @current_player = computer.marker
     else
       computer_moves
-      @current_player = HUMAN_MARKER
+      @current_player = human.marker
     end
     computer.next_best_move = nil
   end
@@ -357,13 +378,12 @@ class TTTGame
       clear_screen
       puts "Sorry, only use Enter or no (n works too)."
     end
-    # clear_screen
     answer.start_with?('n')
   end
 
   def reset_round
     board.reset
-    @current_player = FIRST_TO_MOVE
+    @current_player = @first_player
     clear_screen
   end
 
@@ -380,7 +400,7 @@ class TTTGame
   end
 
   def human_turn?
-    @current_player == HUMAN_MARKER
+    @current_player == human.marker
   end
 end
 

@@ -145,14 +145,14 @@ class TTTGame
 
   def assign_first_player
     @first_player = case FIRST_TO_MOVE
-                      when 'human' then human.marker
-                      when 'computer' then computer.marker
-                      when 'choose'
-                        case human_choose_first_player[0]
-                        when 'm' then human.marker
-                        when 'c' then computer.marker
-                        end
+                    when 'human' then human.marker
+                    when 'computer' then computer.marker
+                    when 'choose'
+                      case human_choose_first_player[0]
+                      when 'm' then human.marker
+                      when 'c' then computer.marker
                       end
+                    end
     @current_player = @first_player
   end
 
@@ -327,11 +327,11 @@ class TTTGame
     square = if chance_to_win? || immediate_threat?
                computer.next_best_move
              elsif board[5].unmarked?
-              5
+               5
              else
                board.unmarked_keys.sample
              end
-    board[square] = computer.marker  
+    board[square] = computer.marker
   end
 
   def current_player_moves

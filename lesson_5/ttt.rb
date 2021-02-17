@@ -1,20 +1,3 @@
-module Clearable
-  def clear_screen
-    system("clear") || system("cls")
-  end
-end
-
-module Joinable
-  def joinor(arr, delimiter=', ', conjunction='or')
-    if arr.size < 2
-      arr.join(delimiter)
-    else
-      last_item = arr.pop
-      arr.join(delimiter) + delimiter + conjunction + ' ' + last_item.to_s
-    end
-  end
-end
-
 class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] + # columns
@@ -115,8 +98,6 @@ class TTTGame
   MARKER_OPTIONS = ["X", "O"]
   FIRST_TO_MOVE = 'choose'
   WINNING_ROUNDS = 5
-
-  include Clearable, Joinable
 
   attr_reader :board, :human, :computer, :current_player
   attr_accessor :rounds
@@ -438,6 +419,19 @@ class TTTGame
 
   def human_turn?
     @current_player == human.marker
+  end
+
+  def joinor(arr, delimiter=', ', conjunction='or')
+    if arr.size < 2
+      arr.join(delimiter)
+    else
+      last_item = arr.pop
+      arr.join(delimiter) + delimiter + conjunction + ' ' + last_item.to_s
+    end
+  end
+
+  def clear_screen
+    system("clear") || system("cls")
   end
 end
 

@@ -285,6 +285,7 @@ class TTTGame
   end
 
   def display_round_and_scores
+    clear_screen
     puts "**** Game #{rounds} ****"
     puts "Scores: #{human.name} has #{human.score},"\
     " #{computer.name} has #{computer.score}"
@@ -304,6 +305,7 @@ class TTTGame
 
   def clear_screen_and_display_board
     clear_screen
+    display_round_and_scores
     display_board
   end
 

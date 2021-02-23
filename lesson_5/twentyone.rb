@@ -2,16 +2,14 @@ require "pry"
 require "pry-byebug"
 
 class Participant
-  attr_accessor :name, :hand
+  attr_accessor :name, :hand, :stay
 
   def initialize
     @hand = []
+    @stay = false
   end
 
   def hit
-  end
-
-  def stay
   end
 
   def busted?
@@ -21,9 +19,7 @@ class Participant
   end
 end
 
-class Player < Participant
-
-end
+class Player < Participant; end
 
 class Dealer < Participant
   NAMES = %w(Bryce Edward Arnold Russ Don Ken Stanford Tommy)
@@ -113,7 +109,7 @@ class Game
       reset_and_shuffle
       deal
       player_turn
-      return if busted?
+      return if busted? # TODO: pass something from this method to trigger busted message?
       dealer_turn
   end
 
@@ -146,12 +142,11 @@ class Game
     puts "- Once you stay, #{dealer.name} plays. He'll hit if his hand total"\
          "is less than #{Dealer::HIT_UNDER}."
     puts "- Whoever has the closest to 21 without busting, wins."
-    puts ""
   end
 
   def reset_and_shuffle
     self.deck = Deck.new
-    # TODO: will need to reset scores 
+    # TODO: will need to reset scores and player.stay and dealer.stay == false
   end
 
   def deal
@@ -165,14 +160,15 @@ class Game
     # clear_screen
     loop do
       display_hands
-      move = hit_or_stay
-      break move == stay || player.busted?
+      hit_or_stay
+      break if player.stay #|| player.busted?
     end
   end
 
   def display_hands
     # TODO: dry this up and adapt it to work for both during gameplay and
           # displaying results (both full hands)
+    puts ""
     puts "---Current hands---"
     puts "#{dealer.name}: #{dealer.hand[0].rank} of #{dealer.hand[0].suit}"\
          " & unknown"
@@ -185,8 +181,29 @@ class Game
   end
 
   def hit_or_stay
+    prompt_for_choice.start_with?('h') ? player_hits : player_stays
+  end
+
+  def player_hits
+    player.hand << deck.draw
+  end
+
+  def player_stays
     puts ""
-    puts "Do you want to hit or stay?"
+    puts "You stayed."
+    player.stay = true
+  end
+  
+  def prompt_for_choice
+    choice = nil
+    loop do
+      puts ""
+      puts "Do you want to (h)it or (s)tay?"
+      choice = gets.chomp.downcase
+      break if ['h', 'hit', 's', 'stay'].include?(choice)
+      puts "That's not a valid option. Type hit or stay (or h/s) only."
+    end
+    choice
   end
 
   def clear_screen

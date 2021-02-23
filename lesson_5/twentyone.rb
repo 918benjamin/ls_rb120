@@ -2,6 +2,8 @@ require "pry"
 require "pry-byebug"
 
 class Participant
+  BUST_NUMBER = 21
+
   attr_accessor :name, :hand, :stay
 
   def initialize
@@ -9,13 +11,18 @@ class Participant
     @stay = false
   end
 
-  def hit
-  end
+  # def hit
+  # end
+
+  # def stay
+  # end
 
   def busted?
+    total > BUST_NUMBER
   end
 
   def total
+    hand.reduce(0) { |sum, card| sum += card.value}
   end
 end
 
@@ -77,7 +84,12 @@ class Card
   # end
 
   def value
-    RANK_VALUES.fetch(rank, rank) # TODO: handle aces
+    case rank
+    when 'Ace'
+      RANK_VALUES.fetch(rank, rank)[0]
+    else
+      RANK_VALUES.fetch(rank, rank) # TODO: handle aces
+    end
   end
 end
 
@@ -109,7 +121,7 @@ class Game
       reset_and_shuffle
       deal
       player_turn
-      return if busted? # TODO: pass something from this method to trigger busted message?
+      return if player.busted? # TODO: pass something from this method to trigger busted message?
       dealer_turn
   end
 
@@ -161,7 +173,7 @@ class Game
     loop do
       display_hands
       hit_or_stay
-      break if player.stay #|| player.busted?
+      break if player.stay || player.busted?
     end
   end
 

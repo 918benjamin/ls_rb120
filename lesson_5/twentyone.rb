@@ -1,70 +1,87 @@
+require "pry"
+require "pry-byebug"
+
 class Participant
-  attr_accessor :name
+  attr_accessor :name, :hand
+
+  def initialize
+    @hand = []
+  end
+
+  def hit
+  end
+
+  def stay
+  end
+
+  def busted?
+  end
+
+  def total
+  end
 end
 
 class Player < Participant
-  def initialize
-    # what would the "data" or "states" of a Player object entail?
-    # maybe cards? a name?
-  end
 
-  def hit
-  end
-
-  def stay
-  end
-
-  def busted?
-  end
-
-  def total
-    # definitely looks like we need to know about "cards to produce" a total
-  end
 end
 
 class Dealer < Participant
-  NAMES = %w(Bryce, Edward, Arnold, Russ, Don, Ken, Stanford, Tommy)
+  NAMES = %w(Bryce Edward Arnold Russ Don Ken Stanford Tommy)
   HIT_UNDER = 17
-
-  def initialize
-    # seems like very similar to player, do we even need this?
-  end
-
-  def deal
-    # does the dealer or the deck deal
-  end
-
-  def hit
-  end
-
-  def stay
-  end
-
-  def busted?
-  end
-
-  def total
-  end
-end
-
-class Participant
-  # what goes in here? All the redundant behaviors from Player and Dealer?
 end
 
 class Deck
+  RANKS = ((2..10).to_a + %w(Jack Queen King Ace)).freeze
+  SUITS = %w(Hearts Clubs Diamonds Spades).freeze
+
+  attr_reader :cards
+
   def initialize
-    # obviously, we need some data structure to keep track of cards
-    # array, hash, something else?
+    shuffle
   end
 
-  def deal
-    # does the dealer or the deck deal?
+  def draw
+    shuffle if cards.empty?
+    cards.pop
+  end
+
+  def shuffle
+    @cards = []
+    RANKS.each do |rank|
+      SUITS.each do |suit|
+        @cards << Card.new(rank, suit)
+      end
+    end
+    cards.shuffle!
   end
 end
 
 class Card
-  def initialize
-    # what are the "states" of a card?
+  RANK_VALUES = {'Jack' => 10,
+    'Queen' => 10,
+    'King' => 10,
+    'Ace' => [11, 1] # gonna be a problem
+   }
+
+  include Comparable
+
+  attr_reader :rank, :suit
+
+  def initialize(rank, suit)
+    @rank = rank
+    @suit = suit
+  end
+
+  def <=>(other)
+    value <=> other.value
+  end
+
+  # def to_s
+    # "#{rank} of #{suit}"
+  # end
+
+  def value
+    RANK_VALUES.fetch(rank, rank) # TODO: handle aces
   end
 end
 
@@ -72,11 +89,13 @@ class Game
   def initialize
     @player = Player.new
     @dealer = Dealer.new
+    @deck = nil
   end
 
   def start
-    assign_names # prompt the user for their name and assign the dealer a cool name
+    assign_names
     display_welcome_message
+    # Some kind of 'next' before dealing the hand?
     loop do
       play_round
       determine_winner
@@ -88,10 +107,10 @@ class Game
 
   private
 
-  attr_accessor :player, :dealer
+  attr_accessor :player, :dealer, :deck
 
   def play_round
-      reset_and_shuffle # shuffle the deck and reset the scores
+      reset_and_shuffle
       deal
       player_turn
       return if busted?
@@ -109,7 +128,7 @@ class Game
       puts "What's your name, friend?"
       player.name = gets.chomp.capitalize
       break unless player.name.empty?
-      puts "I don't think that's your name... put something at least!"
+      puts "I don't think that's your name... put something please!"
     end
   end
 
@@ -131,6 +150,43 @@ class Game
   end
 
   def reset_and_shuffle
+    self.deck = Deck.new
+    # TODO: will need to reset scores 
+  end
+
+  def deal
+    2.times do
+      player.hand << deck.draw
+      dealer.hand << deck.draw 
+    end
+  end
+
+  def player_turn
+    # clear_screen
+    loop do
+      display_hands
+      move = hit_or_stay
+      break move == stay || player.busted?
+    end
+  end
+
+  def display_hands
+    # TODO: dry this up and adapt it to work for both during gameplay and
+          # displaying results (both full hands)
+    puts "---Current hands---"
+    puts "#{dealer.name}: #{dealer.hand[0].rank} of #{dealer.hand[0].suit}"\
+         " & unknown"
+    print "#{player.name} has "
+    player.hand.each_with_index do |card, index|
+      print "#{card.rank} of #{card.suit}"
+      print ' & ' unless index == player.hand.size - 1
+    end
+    puts ""
+  end
+
+  def hit_or_stay
+    puts ""
+    puts "Do you want to hit or stay?"
   end
 
   def clear_screen

@@ -227,7 +227,7 @@ class Game
 
   def player_stays
     puts ""
-    puts "You stayed."
+    puts "You stay"
     player.stay = true
   end
 
@@ -249,14 +249,20 @@ class Game
 
   def determine_winner
     case
-    when player.busted?, player.total < dealer.total
-      self.winner = dealer
-      self.loser = player
-    when dealer.busted?, player.total > dealer.total
-      self.winner = player
-      self.loser = dealer
+    when player.busted? then set_winner(dealer)
+    when dealer.busted? then set_winner(player)
+    when player.total > dealer.total then set_winner(player)
+    when player.total < dealer.total then set_winner(dealer)
     else self.winner = 'tie'
     end
+  end
+
+  def set_winner(winner)
+    participants = [player, dealer]
+    participants.delete(winner)
+
+    self.winner = winner
+    self.loser = participants.first
   end
   
   def prompt_for_choice

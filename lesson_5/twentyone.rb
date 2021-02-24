@@ -63,7 +63,7 @@ class Card
   RANK_VALUES = {'Jack' => 10,
     'Queen' => 10,
     'King' => 10,
-    'Ace' => [11, 1] # gonna be a problem
+    'Ace' => [11, 1] # TODO: gonna be a problem
    }
 
   include Comparable
@@ -78,10 +78,6 @@ class Card
   def <=>(other)
     value <=> other.value
   end
-
-  # def to_s
-    # "#{rank} of #{suit}"
-  # end
 
   def value
     case rank
@@ -123,7 +119,7 @@ class Game
       deal
       player_turn
       return if player.busted? # TODO: pass something from this method to trigger busted message?
-      # dealer_turn
+      dealer_turn
   end
 
   def assign_names
@@ -187,12 +183,23 @@ class Game
   end
 
   def player_turn
-    # clear_screen
     loop do
       display_hands
       hit_or_stay
       break if player.stay || player.busted?
     end
+  end
+
+  def dealer_turn
+    loop do
+      break if dealer.total > Dealer::HIT_UNDER || dealer.busted?
+      puts "#{dealer.name} hits"
+      sleep 2
+      dealer.hand << deck.draw
+
+    end
+    puts "#{dealer.name} " + (dealer.busted? ? "busted" : "stays")
+    sleep 2
   end
 
   def display_hands

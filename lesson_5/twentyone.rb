@@ -98,15 +98,16 @@ class Game
     @player = Player.new
     @dealer = Dealer.new
     @deck = nil
+    @winner = nil
+    @loser = nil
   end
 
   def start
     assign_names
     display_welcome_message
-    start?
+    enter_to_begin
     loop do
       play_round
-      determine_winner
       display_winner
       break unless play_again?
     end
@@ -115,14 +116,14 @@ class Game
 
   private
 
-  attr_accessor :player, :dealer, :deck
+  attr_accessor :player, :dealer, :deck, :winner, :loser
 
   def play_round
       reset_and_shuffle
       deal
       player_turn
       return if player.busted? # TODO: pass something from this method to trigger busted message?
-      dealer_turn
+      # dealer_turn
   end
 
   def assign_names
@@ -156,10 +157,10 @@ class Game
     puts "- Whoever has the closest to 21 without busting, wins."
   end
 
-  def start?
+  def enter_to_begin
     puts ""
     loop do
-      print "Hit enter to get started "
+      print "Hit enter to get started"
       choice = gets.chomp
       break if choice == ''
       puts "Invalid. Don't type anything, just hit enter"
@@ -215,6 +216,34 @@ class Game
     puts ""
     puts "You stayed."
     player.stay = true
+  end
+
+  def display_winner
+    clear_screen
+    puts "Final score of this round:"
+    determine_winner
+    if winner == 'tie'
+      puts "It's a tie!" 
+      puts "#{player.name} and #{dealer.name} both had #{player.total} total"
+      puts player.total == dealer.total # for double checking
+      return
+    end
+    puts "#{winner.name} is the winner with #{winner.total} total"
+    print "#{loser.name} suffered a crushing blow with #{loser.total} total"
+    print "#{' (busted)' if loser.busted?}"
+    puts ""
+  end
+
+  def determine_winner
+    case
+    when player.busted?, player.total < dealer.total
+      self.winner = dealer
+      self.loser = player
+    when dealer.busted?, player.total > dealer.total
+      self.winner = player
+      self.loser = dealer
+    else self.winner = 'tie'
+    end
   end
   
   def prompt_for_choice

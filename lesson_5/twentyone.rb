@@ -7,8 +7,7 @@ class Participant
   attr_accessor :name, :hand, :stay
 
   def initialize
-    @hand = []
-    @stay = false
+    reset
   end
 
   # def hit
@@ -23,6 +22,11 @@ class Participant
 
   def total
     hand.reduce(0) { |sum, card| sum += card.value}
+  end
+
+  def reset
+    @hand = []
+    @stay = false
   end
 end
 
@@ -118,7 +122,7 @@ class Game
       reset_and_shuffle
       deal
       player_turn
-      return if player.busted? # TODO: pass something from this method to trigger busted message?
+      return if player.busted?
       dealer_turn
   end
 
@@ -172,7 +176,8 @@ class Game
 
   def reset_and_shuffle
     self.deck = Deck.new
-    # TODO: will need to reset scores and player.stay and dealer.stay == false
+    player.reset
+    dealer.reset
   end
 
   def deal
@@ -238,7 +243,6 @@ class Game
     if winner == 'tie'
       puts "It's a tie!" 
       puts "#{player.name} and #{dealer.name} both had #{player.total} total"
-      puts player.total == dealer.total # for double checking
       return
     end
     puts "#{winner.name} is the winner with #{winner.total} total"

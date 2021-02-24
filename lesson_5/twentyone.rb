@@ -103,7 +103,7 @@ class Game
   def start
     assign_names
     display_welcome_message
-    # Some kind of 'next' before dealing the hand?
+    start?
     loop do
       play_round
       determine_winner
@@ -152,8 +152,19 @@ class Game
     puts "- You and the dealer, #{dealer.name}, both get two cards."
     puts "- You'll go first: hit or stay. If you go over 21, you bust."
     puts "- Once you stay, #{dealer.name} plays. He'll hit if his hand total"\
-         "is less than #{Dealer::HIT_UNDER}."
+         " is less than #{Dealer::HIT_UNDER}."
     puts "- Whoever has the closest to 21 without busting, wins."
+  end
+
+  def start?
+    puts ""
+    loop do
+      print "Hit enter to get started "
+      choice = gets.chomp
+      break if choice == ''
+      puts "Invalid. Don't type anything, just hit enter"
+      puts ""
+    end
   end
 
   def reset_and_shuffle
@@ -180,9 +191,9 @@ class Game
   def display_hands
     # TODO: dry this up and adapt it to work for both during gameplay and
           # displaying results (both full hands)
-    puts ""
+    clear_screen
     puts "---Current hands---"
-    puts "#{dealer.name}: #{dealer.hand[0].rank} of #{dealer.hand[0].suit}"\
+    puts "#{dealer.name} has #{dealer.hand[0].rank} of #{dealer.hand[0].suit}"\
          " & unknown"
     print "#{player.name} has "
     player.hand.each_with_index do |card, index|

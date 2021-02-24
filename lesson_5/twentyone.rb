@@ -157,6 +157,12 @@ class Game
     puts "- Whoever has the closest to 21 without busting, wins."
   end
 
+  def display_goodbye_message
+    clear_screen
+    puts "Thanks for playing, #{player.name}!"
+    puts "Goodbye"
+  end
+
   def enter_to_begin
     puts ""
     loop do
@@ -256,6 +262,18 @@ class Game
       puts "That's not a valid option. Type hit or stay (or h/s) only."
     end
     choice
+  end
+
+  def play_again?
+    choice = nil
+    loop do
+      puts ""
+      puts "Would you like to play again? (y/n)"
+      choice = gets.chomp.downcase
+      break if ['y', 'yes', 'n', 'no'].include?(choice)
+      puts "Invalid. Please type yes, no, y, or n"
+    end
+    choice.start_with?('y')
   end
 
   def clear_screen
